@@ -1,4 +1,5 @@
 import sys
+import argparse
 import os
 from scripts.functions import get_image_hashes, find_duplicates, delete_duplicates
 
@@ -6,49 +7,52 @@ def main():
     """
     The main function to run the duplicate image detection and deletion tool.
     
-    This function handles command-line arguments, orchestrates the workflow
-    by calling functions from the scripts.functions module, and provides
-    a user interface for confirming deletions.
+    This function handles command-line arguments using the argparse module,
+    orchestrates the workflow by calling functions from the scripts.functions
+    module, and provides a user interface for confirming deletions.
     """
-    # Check for correct number of command-line arguments
-    if len(sys.argv) < 2:
-        print("Usage: python main.py <directory_path> [--threshold <int>] [--strategy <str>]")
-        print("Example: python main.py /path/to/my/images --threshold 10 --strategy keep_smallest")
-        print("\nNote: The threshold is the maximum Hamming distance for near-duplicates.")
-        print("Supported strategies: 'keep_first' (default) or 'keep_smallest'.")
-        sys.exit(1)
+    # 1. Create a new ArgumentParser object
+    parser = argparse.ArgumentParser(
+        description="A tool to detect and delete duplicate and near-duplicate images based on their content."
+    )
     
-    target_directory = sys.argv[1]
-
-    # Handle optional arguments for near-duplicate threshold and deletion strategy
-    threshold = 10  # Default value
-    strategy = 'keep_first' # Default value
+    # 2. Add required positional argument for the directory path
+    parser.add_argument(
+        "directory",
+        type=str,
+        help="The path to the directory to scan for duplicate images."
+    )
     
+    # 3. Add optional argument for the near-duplicate threshold
+    parser.add_argument(
+        "--threshold",
+        type=int,
+        default=10,
+        help="The maximum Hamming distance for two images to be considered near-duplicates. (default: 10)"
+    )
+    
+    # 4. Add optional argument for the deletion strategy with choices
+    parser.add_argument(
+        "--strategy",
+        type=str,
+        default='keep_first',
+        choices=['keep_first', 'keep_smallest'],
+        help="The strategy to use for deletion: 'keep_first' or 'keep_smallest'. (default: 'keep_first')"
+    )
+    
+    # 5. Parse the command-line arguments
     try:
-        if "--threshold" in sys.argv:
-            index = sys.argv.index("--threshold")
-            if index + 1 < len(sys.argv):
-                threshold = int(sys.argv[index + 1])
-                print(f"Using a near-duplicate threshold of: {threshold}")
-            else:
-                print("Error: --threshold flag requires an integer value.", file=sys.stderr)
-                sys.exit(1)
-
-        if "--strategy" in sys.argv:
-            index = sys.argv.index("--strategy")
-            if index + 1 < len(sys.argv):
-                strategy = sys.argv[index + 1].lower()
-                if strategy not in ['keep_first', 'keep_smallest']:
-                    print(f"Warning: Invalid strategy '{strategy}'. Using 'keep_first' instead.", file=sys.stderr)
-                    strategy = 'keep_first'
-                print(f"Using deletion strategy: {strategy}")
-            else:
-                print("Error: --strategy flag requires a value.", file=sys.stderr)
-                sys.exit(1)
-    except ValueError:
-        print("Error: The threshold must be an integer.", file=sys.stderr)
+        args = parser.parse_args()
+    except Exception as e:
+        print(f"Error parsing arguments: {e}", file=sys.stderr)
         sys.exit(1)
 
+    # Use the parsed arguments
+    target_directory = args.directory
+    threshold = args.threshold
+    strategy = args.strategy
+
+    # Perform additional checks not handled by argparse
     # Verify that the provided path is a valid directory
     if not os.path.isdir(target_directory):
         print(f"Error: The provided path '{target_directory}' is not a valid directory.", file=sys.stderr)
@@ -56,6 +60,7 @@ def main():
     
     # Step 1: Get all image hashes
     try:
+        print(f"Scanning '{target_directory}' with threshold {threshold} and strategy '{strategy}'...")
         hashes_map = get_image_hashes(target_directory)
     except Exception as e:
         print(f"An unexpected error occurred during hashing: {e}", file=sys.stderr)
