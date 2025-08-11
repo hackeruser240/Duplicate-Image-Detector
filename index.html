@@ -8,16 +8,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- 
-        Chosen Palette: Warm Neutrals (Slate, Zinc, Stone)
-        Application Structure Plan: A top-down narrative SPA. It starts with a high-level intro, moves to an interactive flowchart of the core process, then dives into key concepts with toggles, provides a tabbed code explorer, and ends with practical usage instructions. This structure was chosen to guide the user from a broad understanding to specific details, making complex information digestible. The interactive flowchart is the centerpiece, designed to make the abstract process tangible and engaging.
-        Visualization & Content Choices: 
-        - Report Info: Core project workflow -> Goal: Organize/Inform -> Viz: Interactive HTML/CSS flowchart -> Interaction: Click steps to reveal code/explanations -> Justification: More engaging and clearer than static text, directly linking process steps to the source code.
-        - Report Info: Key concepts (hashing, distance) -> Goal: Inform -> Viz: Accordion/toggle component -> Interaction: Click to expand -> Justification: Hides complexity by default, allowing users to self-direct their learning.
-        - Report Info: Source code files -> Goal: Organize -> Viz: Tabbed interface -> Interaction: Click to switch files -> Justification: Standard, clean UI for presenting multiple code blocks without excessive scrolling.
-        - Library/Method: All interactions are handled with vanilla JavaScript. All visuals are built with HTML and Tailwind CSS.
-        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
-    -->
+    <!-- Chosen Palette: Warm Neutrals (Slate, Zinc, Stone) -->
+    <!-- Application Structure Plan: A top-down narrative SPA. It starts with a high-level intro, moves to an interactive flowchart of the core process, then dives into key concepts with toggles, provides a tabbed code explorer, and ends with practical usage instructions. This structure was chosen to guide the user from a broad understanding to specific details, making complex information digestible. The interactive flowchart is the centerpiece, designed to make the abstract process tangible and engaging. -->
+    <!-- Visualization & Content Choices: 
+    - Report Info: Core project workflow -> Goal: Organize/Inform -> Viz: Interactive HTML/CSS flowchart -> Interaction: Click steps to reveal code/explanations -> Justification: More engaging and clearer than static text, directly linking process steps to the source code.
+    - Report Info: Key concepts (hashing, distance) -> Goal: Inform -> Viz: Accordion/toggle component -> Interaction: Click to expand -> Justification: Hides complexity by default, allowing users to self-direct their learning.
+    - Report Info: Source code files -> Goal: Organize -> Viz: Tabbed interface -> Interaction: Click to switch files -> Justification: Standard, clean UI for presenting multiple code blocks without excessive scrolling.
+    - Library/Method: All interactions are handled with vanilla JavaScript. All visuals are built with HTML and Tailwind CSS.
+    CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -190,6 +188,7 @@
                     <button class="code-tab p-3 font-mono text-sm text-slate-300 border-b-2 border-transparent" data-target="main-py">main.py</button>
                     <button class="code-tab p-3 font-mono text-sm text-slate-300 border-b-2 border-transparent" data-target="functions-py">scripts/functions.py</button>
                     <button class="code-tab p-3 font-mono text-sm text-slate-300 border-b-2 border-transparent" data-target="variables-py">scripts/variables.py</button>
+                    <button class="code-tab p-3 font-mono text-sm text-slate-300 border-b-2 border-transparent" data-target="requirements-txt">requirements.txt</button>
                 </div>
                 <div class="p-4 text-sm max-h-[500px] overflow-y-auto">
                     <pre id="main-py" class="code-content language-python text-white"><code class="language-python">
@@ -295,7 +294,7 @@ def get_image_hashes(var, hash_size=8, hash_method='dhash'):
             try:
                 with Image.open(file_path) as img:
                     img = img.convert('RGB')
-                    image_hash = imagehash.dhash(img, hash_size=hash_size)
+                    image_hash = imagehash.dhash(img)
 
                     hash_str = str(image_hash)
                     if hash_str in var.image_hashes:
@@ -400,6 +399,10 @@ class Variables:
         self.image_hashes = {}
         self.duplicate_groups = []
                     </code></pre>
+                    <pre id="requirements-txt" class="code-content language-text hidden text-white"><code class="language-text">
+imagehash
+Pillow
+                    </code></pre>
                 </div>
             </div>
         </section>
@@ -409,32 +412,33 @@ class Variables:
             <div class="text-center mb-8">
                 <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Get Started</h3>
                 <p class="max-w-2xl mx-auto mt-3 text-lg text-slate-600">
-                    Ready to try it out? Follow these simple steps to run the tool on your own computer. You'll need Python and the required libraries installed.
+                    Ready to try it out? Follow these simple steps to set up your environment and run the tool on your own computer. You'll need Python installed.
                 </p>
             </div>
             <div class="space-y-6">
                 <div>
-                    <h4 class="font-semibold text-lg text-slate-800 mb-2">1. Install Dependencies</h4>
-                    <p class="text-slate-600 mb-2">Open your terminal or command prompt and run this command to install the necessary libraries.</p>
+                    <h4 class="font-semibold text-lg text-slate-800 mb-2">1. Set Up the Environment</h4>
+                    <p class="text-slate-600 mb-2">Create and activate a virtual environment to manage dependencies for the project. This is a best practice to keep your system clean.</p>
                     <div class="bg-slate-800 rounded-md p-3 text-white font-mono text-sm relative">
                         <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded">Copy</button>
-                        <code>pip install imagehash Pillow</code>
+                        <code>python -m venv py-env && py-env\Scripts\activate</code>
+                    </div>
+                    <p class="text-slate-600 mt-2 text-xs">Note: On Windows, use `venv\Scripts\activate` to activate the environment.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-lg text-slate-800 mb-2">2. Install Dependencies</h4>
+                    <p class="text-slate-600 mb-2">With your environment activated, run the following command to install all necessary libraries from `requirements.txt`.</p>
+                     <div class="bg-slate-800 rounded-md p-3 text-white font-mono text-sm relative">
+                        <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded">Copy</button>
+                        <code>pip install -r requirements.txt</code>
                     </div>
                 </div>
                 <div>
-                    <h4 class="font-semibold text-lg text-slate-800 mb-2">2. Run the Script</h4>
+                    <h4 class="font-semibold text-lg text-slate-800 mb-2">3. Run the Script</h4>
                     <p class="text-slate-600 mb-2">Navigate to the project directory in your terminal and run the `main.py` script, followed by the path to the folder you want to scan.</p>
                      <div class="bg-slate-800 rounded-md p-3 text-white font-mono text-sm relative">
                         <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded">Copy</button>
                         <code>python main.py "path/to/your/image/directory"</code>
-                    </div>
-                </div>
-                <div>
-                    <h4 class="font-semibold text-lg text-slate-800 mb-2">3. Use Optional Arguments (Optional)</h4>
-                    <p class="text-slate-600 mb-2">Customize the run by adding flags for threshold or deletion strategy.</p>
-                     <div class="bg-slate-800 rounded-md p-3 text-white font-mono text-sm relative">
-                        <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded">Copy</button>
-                        <code>python main.py "path/to/your/photos" --threshold 5 --strategy keep_smallest</code>
                     </div>
                 </div>
             </div>
@@ -562,12 +566,32 @@ if response in ['yes', 'y']:
         button.addEventListener('click', (e) => {
             const codeElement = e.target.nextElementSibling;
             const code = codeElement.innerText;
-            navigator.clipboard.writeText(code).then(() => {
-                e.target.innerText = 'Copied!';
-                setTimeout(() => {
-                    e.target.innerText = 'Copy';
-                }, 2000);
-            });
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(code).then(() => {
+                    e.target.innerText = 'Copied!';
+                    setTimeout(() => {
+                        e.target.innerText = 'Copy';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Could not copy text: ', err);
+                });
+            } else {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = code;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    e.target.innerText = 'Copied!';
+                    setTimeout(() => {
+                        e.target.innerText = 'Copy';
+                    }, 2000);
+                } catch (err) {
+                    console.error('Fallback: Could not copy text: ', err);
+                }
+                document.body.removeChild(textarea);
+            }
         });
     });
 });
