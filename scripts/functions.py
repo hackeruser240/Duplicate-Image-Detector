@@ -6,9 +6,8 @@ import re
 
 # This dictionary stores the hashes and their corresponding file paths.
 # It is used to build a comprehensive map of all images in the directory.
-image_hashes = {}
 
-def get_image_hashes(directory, hash_size=8, hash_method='dhash'):
+def get_image_hashes(var, hash_size=8, hash_method='dhash'):
     """
     Recursively walks through a directory, computes a perceptual hash for each
     image file, and stores it in the global image_hashes dictionary.
@@ -24,13 +23,11 @@ def get_image_hashes(directory, hash_size=8, hash_method='dhash'):
         dict: A dictionary where keys are image hashes and values are a list of
               file paths that share that hash.
     """
-    print(f"Scanning directory: {directory}")
+    print(f"Scanning directory: {var.target_directory}")
     
     # Reset the global dictionary for each new scan
-    global image_hashes
-    image_hashes = {}
 
-    for dirpath, _, filenames in os.walk(directory):
+    for dirpath, _, filenames in os.walk(var.target_directory):
         for filename in filenames:
             file_path = os.path.join(dirpath, filename)
             
@@ -58,10 +55,10 @@ def get_image_hashes(directory, hash_size=8, hash_method='dhash'):
                     # Store the hash and file path. The hash is converted to a string
                     # to be used as a dictionary key.
                     hash_str = str(image_hash)
-                    if hash_str in image_hashes:
-                        image_hashes[hash_str].append(file_path)
+                    if hash_str in var.image_hashes:
+                        var.image_hashes[hash_str].append(file_path)
                     else:
-                        image_hashes[hash_str] = [file_path]
+                        var.image_hashes[hash_str] = [file_path]
             
             except Exception as e:
                 # Catch any errors during image processing or file access
@@ -69,7 +66,7 @@ def get_image_hashes(directory, hash_size=8, hash_method='dhash'):
                 continue
     
     print("Scanning complete.")
-    return image_hashes
+    return var.image_hashes
 
 def find_duplicates(hashes_map, threshold=10):
     """
@@ -118,7 +115,7 @@ def find_duplicates(hashes_map, threshold=10):
     
     return duplicates
 
-def delete_duplicates(duplicate_groups, deletion_strategy='keep_first'):
+def delete_duplicates(var, deletion_strategy='keep_first'):
     def numeric_key(path):
         filename = os.path.splitext(os.path.basename(path))[0]
         numbers = re.findall(r'\d+', filename)
@@ -137,19 +134,19 @@ def delete_duplicates(duplicate_groups, deletion_strategy='keep_first'):
         duplicate_groups (list): A list of duplicate groups.
         deletion_strategy (str): 'keep_first' is the default.
     """
-    if not duplicate_groups:
+    if not var.duplicate_groups:
         print("No duplicate images to delete.")
         return
 
     # Sort the duplicate_groups list for a cleaner display
-    duplicate_groups.sort(key=lambda group: numeric_key(group[0]))
+    var.duplicate_groups.sort(key=lambda group: numeric_key(group[0]))
 
-    print(f"\nFound {len(duplicate_groups)} duplicate groups.")
+    print(f"\nFound {len(var.duplicate_groups)} duplicate groups.")
     
     files_to_delete = []
     
     # Determine which files to delete based on the strategy
-    for group in duplicate_groups:
+    for group in var.duplicate_groups:
         # Sort the inner group using a clear deletion key
         group.sort(key=original_file_key)
 
@@ -167,7 +164,7 @@ def delete_duplicates(duplicate_groups, deletion_strategy='keep_first'):
 
     # Print a summary of files to be deleted (Dry Run)
     print("\n--- Dry Run: Duplicate files ---")
-    for group in duplicate_groups:
+    for group in var.duplicate_groups:
         # The inner group is already sorted for deletion, so we can just print it
         print(f"{group[0]}: {group[1:]}")
     print("-----------------------------------")

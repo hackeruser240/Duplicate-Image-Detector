@@ -2,8 +2,9 @@ import sys
 import argparse
 import os
 from scripts.functions import get_image_hashes, find_duplicates, delete_duplicates
+from scripts.variables import Variables
 
-def main():
+def main(var):
     """
     The main function to run the duplicate image detection and deletion tool.
     
@@ -48,34 +49,34 @@ def main():
         sys.exit(1)
 
     # Use the parsed arguments
-    target_directory = args.directory
-    threshold = args.threshold
-    strategy = args.strategy
+    var.target_directory = args.directory
+    var.threshold = args.threshold
+    var.strategy = args.strategy
 
     # Perform additional checks not handled by argparse
     # Verify that the provided path is a valid directory
-    if not os.path.isdir(target_directory):
-        print(f"Error: The provided path '{target_directory}' is not a valid directory.", file=sys.stderr)
+    if not os.path.isdir(var.target_directory):
+        print(f"Error: The provided path '{var.target_directory}' is not a valid directory.", file=sys.stderr)
         sys.exit(1)
     
     # Step 1: Get all image hashes
     try:
-        print(f"Scanning '{target_directory}' with threshold {threshold} and strategy '{strategy}'...")
-        hashes_map = get_image_hashes(target_directory)
+        print(f"Scanning '{var.target_directory}' with threshold {var.threshold} and strategy '{var.strategy}'...")
+        hashes_map = get_image_hashes(var)
     except Exception as e:
         print(f"An unexpected error occurred during hashing: {e}", file=sys.stderr)
         sys.exit(1)
     
     # Step 2: Find duplicate groups
     try:
-        duplicate_groups = find_duplicates(hashes_map, threshold=threshold)
+        var.duplicate_groups = find_duplicates(hashes_map, threshold=var.threshold)
     except Exception as e:
         print(f"An unexpected error occurred while finding duplicates: {e}", file=sys.stderr)
         sys.exit(1)
     
     # Step 3: Delete duplicates after user confirmation
     try:
-        delete_duplicates(duplicate_groups, deletion_strategy=strategy)
+        delete_duplicates(var, deletion_strategy=var.strategy)
     except Exception as e:
         print(f"An unexpected error occurred during deletion: {e}", file=sys.stderr)
         sys.exit(1)
@@ -83,4 +84,5 @@ def main():
     print("\nProcess finished.")
 
 if __name__ == "__main__":
-    main()
+    var=Variables()
+    main(var)
