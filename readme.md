@@ -2,4 +2,4 @@
 
 Welcome to the interactive explainer for the Duplicate Image Finder tool.
 
-[🚀 View the documentation here!](https://hackeruser240.github.io/Duplicate-Image-Detector/)
+<a href="https://hackeruser240.github.io/Duplicate-Image-Detector/" target="_blank" rel="noopener noreferrer">🚀 View the documentation here!</a>
