@@ -2,7 +2,7 @@ import os
 from PIL import Image
 import imagehash
 import sys
-import shutil
+import re
 
 # This dictionary stores the hashes and their corresponding file paths.
 # It is used to build a comprehensive map of all images in the directory.
@@ -119,6 +119,11 @@ def find_duplicates(hashes_map, threshold=10):
     return duplicates
 
 def delete_duplicates(duplicate_groups, deletion_strategy='keep_first'):
+    def numeric_key(path):
+        filename = os.path.splitext(os.path.basename(path))[0]
+        numbers = re.findall(r'\d+', filename)
+        numeric_tuple = tuple(int(num) for num in numbers) if numbers else (float('inf'),)
+        return (numeric_tuple, len(filename), filename.lower())
     """
     Deletes duplicate images from the disk based on a chosen strategy.
     
@@ -131,6 +136,11 @@ def delete_duplicates(duplicate_groups, deletion_strategy='keep_first'):
     if not duplicate_groups:
         print("No duplicate images to delete.")
         return
+
+    # Sort the duplicate_groups list at the start
+    # The key function will apply numeric_key to the first item of each sublist
+    duplicate_groups.sort(key=lambda group: numeric_key(group[0]))
+    print(f"duplicate_groups: {duplicate_groups}")
 
     print(f"\nFound {len(duplicate_groups)} duplicate groups.")
     
@@ -154,21 +164,21 @@ def delete_duplicates(duplicate_groups, deletion_strategy='keep_first'):
     
         
     # Print a summary of files to be deleted (Dry Run)
-    print("\n--- Dry Run: Files to be deleted ---")
-    for item in first_item:
-        for file in files_to_delete:
-            print(f"{item}: {file}")
+    print("\n--- Dry Run: Duplicate files ---")
+    for group in duplicate_groups:
+        group.sort(key=numeric_key)
+        print(f"{group[0]}: {group[1:]}")
     print("-----------------------------------")
     
     # Prompt user for confirmation before deletion
     response = input(f"\nAre you sure you want to delete {len(files_to_delete)} files? (yes/no): ").lower()
     
-    if response == 'yes' or 'y':
+    if response in ['yes' , 'y']:
         deleted_count = 0
         for file_path in files_to_delete:
             try:
                 # Use os.remove to delete the file
-                os.remove(file_path)
+                #os.remove(file_path)
                 deleted_count += 1
                 print(f"Deleted: {file_path}")
             except OSError as e:
@@ -184,5 +194,6 @@ if __name__=="__main__":
     #print(f"image_hashes:{image_hashes}")
     
     duplicates_=find_duplicates(image_hashes)
-    print(duplicates_)
+    #print(duplicates_)
+    result=delete_duplicates(duplicates_)
     
