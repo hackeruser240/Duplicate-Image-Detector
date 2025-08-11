@@ -124,61 +124,62 @@ def delete_duplicates(duplicate_groups, deletion_strategy='keep_first'):
         numbers = re.findall(r'\d+', filename)
         numeric_tuple = tuple(int(num) for num in numbers) if numbers else (float('inf'),)
         return (numeric_tuple, len(filename), filename.lower())
+
+    def original_file_key(path):
+        # A specific key to prioritize the original file for deletion logic
+        filename = os.path.basename(path)
+        return 'copy' in filename.lower()
+
     """
     Deletes duplicate images from the disk based on a chosen strategy.
     
     Args:
-        duplicate_groups (list): A list of duplicate groups, as returned by
-                                 find_duplicates.
-        deletion_strategy (str): The strategy to determine which image to keep.
-                                 'keep_first' is the default.
+        duplicate_groups (list): A list of duplicate groups.
+        deletion_strategy (str): 'keep_first' is the default.
     """
     if not duplicate_groups:
         print("No duplicate images to delete.")
         return
 
-    # Sort the duplicate_groups list at the start
-    # The key function will apply numeric_key to the first item of each sublist
+    # Sort the duplicate_groups list for a cleaner display
     duplicate_groups.sort(key=lambda group: numeric_key(group[0]))
-    print(f"duplicate_groups: {duplicate_groups}")
 
     print(f"\nFound {len(duplicate_groups)} duplicate groups.")
     
     files_to_delete = []
-    first_item=[]
+    
     # Determine which files to delete based on the strategy
     for group in duplicate_groups:
-        first_item.append(group[0])
+        # Sort the inner group using a clear deletion key
+        group.sort(key=original_file_key)
 
         if deletion_strategy == 'keep_first':
-            # Keep the first image found in the group
+            # The first item is now guaranteed to be the 'original'
             files_to_delete.extend(group[1:])
         elif deletion_strategy == 'keep_smallest':
-            # Keep the image with the smallest file size
+            # This logic remains the same, but the inner group is still sorted by the new key
             files_and_sizes = [(path, os.path.getsize(path)) for path in group]
             files_and_sizes.sort(key=lambda x: x[1])
             files_to_delete.extend([path for path, _ in files_and_sizes[1:]])
         else:
             print(f"Error: Unsupported deletion strategy '{deletion_strategy}'. Using 'keep_first'.")
             files_to_delete.extend(group[1:])
-    
-        
+
     # Print a summary of files to be deleted (Dry Run)
     print("\n--- Dry Run: Duplicate files ---")
     for group in duplicate_groups:
-        group.sort(key=numeric_key)
+        # The inner group is already sorted for deletion, so we can just print it
         print(f"{group[0]}: {group[1:]}")
     print("-----------------------------------")
     
     # Prompt user for confirmation before deletion
     response = input(f"\nAre you sure you want to delete {len(files_to_delete)} files? (yes/no): ").lower()
     
-    if response in ['yes' , 'y']:
+    if response in ['yes', 'y']:
         deleted_count = 0
         for file_path in files_to_delete:
             try:
-                # Use os.remove to delete the file
-                #os.remove(file_path)
+                os.remove(file_path)
                 deleted_count += 1
                 print(f"Deleted: {file_path}")
             except OSError as e:
