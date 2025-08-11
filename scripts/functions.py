@@ -135,9 +135,11 @@ def delete_duplicates(duplicate_groups, deletion_strategy='keep_first'):
     print(f"\nFound {len(duplicate_groups)} duplicate groups.")
     
     files_to_delete = []
-    
+    first_item=[]
     # Determine which files to delete based on the strategy
     for group in duplicate_groups:
+        first_item.append(group[0])
+
         if deletion_strategy == 'keep_first':
             # Keep the first image found in the group
             files_to_delete.extend(group[1:])
@@ -150,10 +152,12 @@ def delete_duplicates(duplicate_groups, deletion_strategy='keep_first'):
             print(f"Error: Unsupported deletion strategy '{deletion_strategy}'. Using 'keep_first'.")
             files_to_delete.extend(group[1:])
     
+        
     # Print a summary of files to be deleted (Dry Run)
     print("\n--- Dry Run: Files to be deleted ---")
-    for file in files_to_delete:
-        print(file)
+    for item in first_item:
+        for file in files_to_delete:
+            print(f"{item}: {file}")
     print("-----------------------------------")
     
     # Prompt user for confirmation before deletion
@@ -175,5 +179,10 @@ def delete_duplicates(duplicate_groups, deletion_strategy='keep_first'):
         print("Deletion cancelled by user.")
 
 if __name__=="__main__":
-    image_hashes=get_image_hashes("D:\Pictures\Bears")
-    print(f"image_hashes:{list(image_hashes)}")
+    
+    image_hashes=get_image_hashes(r"D:\Pictures\Bears")
+    #print(f"image_hashes:{image_hashes}")
+    
+    duplicates_=find_duplicates(image_hashes)
+    print(duplicates_)
+    
