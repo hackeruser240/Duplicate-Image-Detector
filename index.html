@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Explainer: Duplicate Image Finder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- 
+        Chosen Palette: Warm Neutrals (Slate, Zinc, Stone)
+        Application Structure Plan: A top-down narrative SPA. It starts with a high-level intro, moves to an interactive flowchart of the core process, then dives into key concepts with toggles, provides a tabbed code explorer, and ends with practical usage instructions. This structure was chosen to guide the user from a broad understanding to specific details, making complex information digestible. The interactive flowchart is the centerpiece, designed to make the abstract process tangible and engaging.
+        Visualization & Content Choices: 
+        - Report Info: Core project workflow -> Goal: Organize/Inform -> Viz: Interactive HTML/CSS flowchart -> Interaction: Click steps to reveal code/explanations -> Justification: More engaging and clearer than static text, directly linking process steps to the source code.
+        - Report Info: Key concepts (hashing, distance) -> Goal: Inform -> Viz: Accordion/toggle component -> Interaction: Click to expand -> Justification: Hides complexity by default, allowing users to self-direct their learning.
+        - Report Info: Source code files -> Goal: Organize -> Viz: Tabbed interface -> Interaction: Click to switch files -> Justification: Standard, clean UI for presenting multiple code blocks without excessive scrolling.
+        - Library/Method: All interactions are handled with vanilla JavaScript. All visuals are built with HTML and Tailwind CSS.
+        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #27272a; /* zinc-800 */
+        }
+        .nav-link {
+            transition: color 0.2s;
+        }
+        .nav-link:hover {
+            color: #0ea5e9; /* sky-500 */
+        }
+        .flow-step {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .flow-step:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .flow-step.active {
+            background-color: #0ea5e9; /* sky-500 */
+            color: white;
+            border-color: #0284c7; /* sky-600 */
+        }
+        .flow-arrow {
+            color: #94a3b8; /* slate-400 */
+        }
+        .code-tab.active {
+            border-color: #0ea5e9; /* sky-500 */
+            color: #0ea5e9; /* sky-500 */
+            background-color: #f0f9ff; /* sky-50 */
+        }
+        .concept-toggle summary::-webkit-details-marker {
+            display: none;
+        }
+        .concept-toggle summary {
+            list-style: none;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 border-b border-slate-200">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800">Duplicate Image Finder</h1>
+                <nav class="hidden md:flex items-center space-x-6 text-slate-600">
+                    <a href="#how-it-works" class="nav-link font-medium">How It Works</a>
+                    <a href="#concepts" class="nav-link font-medium">Key Concepts</a>
+                    <a href="#code-explorer" class="nav-link font-medium">Code Explorer</a>
+                    <a href="#how-to-use" class="nav-link font-medium">How to Use</a>
+                </nav>
+                <button id="mobile-menu-button" class="md:hidden text-slate-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-200">
+            <a href="#how-it-works" class="block py-2 px-4 text-slate-600 hover:bg-slate-100">How It Works</a>
+            <a href="#concepts" class="block py-2 px-4 text-slate-600 hover:bg-slate-100">Key Concepts</a>
+            <a href="#code-explorer" class="block py-2 px-4 text-slate-600 hover:bg-slate-100">Code Explorer</a>
+            <a href="#how-to-use" class="block py-2 px-4 text-slate-600 hover:bg-slate-100">How to Use</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-12">
+
+        <!-- Introduction Section -->
+        <section id="intro" class="text-center mb-16 md:mb-24">
+            <h2 class="text-3xl md:text-5xl font-bold text-slate-900 mb-4">Find and Remove Duplicate Images, Intelligently.</h2>
+            <p class="max-w-3xl mx-auto text-lg md:text-xl text-slate-600">
+                This application is a command-line tool that scans your photo library to find and delete duplicate and near-duplicate images. It doesn't just look at filenames; it analyzes the actual content of each image to find matches, even if they've been resized, re-compressed, or saved in a different format.
+            </p>
+        </section>
+
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl md:text-4xl font-bold text-slate-900">The Workflow: An Interactive Journey</h3>
+                <p class="max-w-2xl mx-auto mt-3 text-lg text-slate-600">
+                    The tool follows a clear, step-by-step process to clean up your image folders. Click on any step below to see a brief explanation and the relevant code snippet that powers it. This interactive diagram shows you exactly how the application works from start to finish.
+                </p>
+            </div>
+
+            <!-- Interactive Flowchart -->
+            <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 mb-8">
+                <div id="step-1" class="flow-step bg-white border-2 border-slate-200 rounded-lg p-4 w-full md:w-48 text-center shadow-sm">
+                    <div class="font-bold text-lg">1. User Input</div>
+                    <div class="text-sm text-slate-500">Parse CLI Arguments</div>
+                </div>
+                <div class="flow-arrow text-2xl md:text-4xl transform md:-rotate-90">↓</div>
+                <div id="step-2" class="flow-step bg-white border-2 border-slate-200 rounded-lg p-4 w-full md:w-48 text-center shadow-sm">
+                    <div class="font-bold text-lg">2. Scan & Hash</div>
+                    <div class="text-sm text-slate-500">Generate Image Hashes</div>
+                </div>
+                <div class="flow-arrow text-2xl md:text-4xl transform md:-rotate-90">↓</div>
+                <div id="step-3" class="flow-step bg-white border-2 border-slate-200 rounded-lg p-4 w-full md:w-48 text-center shadow-sm">
+                    <div class="font-bold text-lg">3. Find Duplicates</div>
+                    <div class="text-sm text-slate-500">Compare Hashes</div>
+                </div>
+                <div class="flow-arrow text-2xl md:text-4xl transform md:-rotate-90">↓</div>
+                <div id="step-4" class="flow-step bg-white border-2 border-slate-200 rounded-lg p-4 w-full md:w-48 text-center shadow-sm">
+                    <div class="font-bold text-lg">4. Delete Files</div>
+                    <div class="text-sm text-slate-500">Confirm & Remove</div>
+                </div>
+            </div>
+
+            <!-- Explanation Box -->
+            <div id="explanation-box" class="mt-8 bg-white rounded-lg shadow-lg p-6 min-h-[200px] transition-opacity duration-300">
+                <!-- Content will be injected here by JS -->
+            </div>
+        </section>
+
+        <!-- Key Concepts Section -->
+        <section id="concepts" class="mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl md:text-4xl font-bold text-slate-900">The Magic Behind the Scenes</h3>
+                <p class="max-w-2xl mx-auto mt-3 text-lg text-slate-600">
+                    The tool relies on a few core computer science concepts to analyze images. These ideas are what make the script "intelligent." Click on each concept to learn more about how it contributes to the process.
+                </p>
+            </div>
+            <div class="max-w-3xl mx-auto space-y-4">
+                <details class="concept-toggle group bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                    <summary class="p-4 cursor-pointer flex justify-between items-center font-semibold text-slate-800 group-hover:bg-slate-50">
+                        Perceptual Hashing
+                        <span class="text-sky-500 transform transition-transform duration-200 group-open:rotate-180">▼</span>
+                    </summary>
+                    <div class="p-4 border-t border-slate-200 text-slate-600">
+                        Instead of a cryptographic hash (like for passwords), a perceptual hash is a "fingerprint" of an image's visual content. The process involves scaling the image to a small, fixed size, converting it to grayscale, and then analyzing its structure to produce a short hash string. Similar-looking images will have very similar hashes.
+                    </div>
+                </details>
+                <details class="concept-toggle group bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                    <summary class="p-4 cursor-pointer flex justify-between items-center font-semibold text-slate-800 group-hover:bg-slate-50">
+                        Hamming Distance
+                        <span class="text-sky-500 transform transition-transform duration-200 group-open:rotate-180">▼</span>
+                    </summary>
+                    <div class="p-4 border-t border-slate-200 text-slate-600">
+                        This is a measure of how different two hashes (of the same length) are. It's calculated by counting the number of positions at which the corresponding characters are different. A Hamming distance of `0` means the hashes are identical. A small distance (e.g., 1-10) means the hashes, and therefore the images, are very similar. The `--threshold` argument in our script sets the maximum allowed Hamming distance for two images to be considered duplicates.
+                    </div>
+                </details>
+                 <details class="concept-toggle group bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                    <summary class="p-4 cursor-pointer flex justify-between items-center font-semibold text-slate-800 group-hover:bg-slate-50">
+                        Deletion Strategies
+                        <span class="text-sky-500 transform transition-transform duration-200 group-open:rotate-180">▼</span>
+                    </summary>
+                    <div class="p-4 border-t border-slate-200 text-slate-600">
+                        When a group of duplicates is found, the script needs a rule to decide which one to keep.
+                        <ul class="list-disc list-inside mt-2 space-y-1">
+                            <li><strong class="font-semibold">keep_first:</strong> This strategy keeps the first image file it found in a duplicate group and deletes all others. It prioritizes files that don't have "copy" in their name.</li>
+                            <li><strong class="font-semibold">keep_smallest:</strong> This strategy calculates the file size of every image in the duplicate group, keeps the one with the smallest size (in bytes), and deletes the rest.</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- Code Explorer Section -->
+        <section id="code-explorer" class="mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Explore the Source Code</h3>
+                <p class="max-w-2xl mx-auto mt-3 text-lg text-slate-600">
+                    The project is split into logical files for better organization. The `main.py` file handles user input, while `functions.py` contains the core logic. `variables.py` holds the data. Click the tabs below to view the complete source code for each file.
+                </p>
+            </div>
+            <div class="max-w-4xl mx-auto bg-slate-800 rounded-lg shadow-2xl overflow-hidden">
+                <div class="flex border-b border-slate-700">
+                    <button class="code-tab p-3 font-mono text-sm text-slate-300 border-b-2 border-transparent" data-target="main-py">main.py</button>
+                    <button class="code-tab p-3 font-mono text-sm text-slate-300 border-b-2 border-transparent" data-target="functions-py">scripts/functions.py</button>
+                    <button class="code-tab p-3 font-mono text-sm text-slate-300 border-b-2 border-transparent" data-target="variables-py">scripts/variables.py</button>
+                </div>
+                <div class="p-4 text-sm max-h-[500px] overflow-y-auto">
+                    <pre id="main-py" class="code-content language-python text-white"><code class="language-python">
+import sys
+import argparse
+import os
+from scripts.functions import get_image_hashes, find_duplicates, delete_duplicates
+from scripts.variables import Variables
+
+def main(var):
+    """
+    The main function to run the duplicate image detection and deletion tool.
+    
+    This function handles command-line arguments using the argparse module,
+    orchestrates the workflow by calling functions from the scripts.functions
+    module, and provides a user interface for confirming deletions.
+    """
+    parser = argparse.ArgumentParser(
+        description="A tool to detect and delete duplicate and near-duplicate images based on their content."
+    )
+    
+    parser.add_argument(
+        "directory",
+        type=str,
+        help="The path to the directory to scan for duplicate images."
+    )
+    
+    parser.add_argument(
+        "--threshold",
+        type=int,
+        default=10,
+        help="The maximum Hamming distance for two images to be considered near-duplicates. (default: 10)"
+    )
+    
+    parser.add_argument(
+        "--strategy",
+        type=str,
+        default='keep_first',
+        choices=['keep_first', 'keep_smallest'],
+        help="The strategy to use for deletion: 'keep_first' or 'keep_smallest'. (default: 'keep_first')"
+    )
+    
+    try:
+        args = parser.parse_args()
+    except Exception as e:
+        print(f"Error parsing arguments: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    var.target_directory = args.directory
+    var.threshold = args.threshold
+    var.strategy = args.strategy
+
+    if not os.path.isdir(var.target_directory):
+        print(f"Error: The provided path '{var.target_directory}' is not a valid directory.", file=sys.stderr)
+        sys.exit(1)
+    
+    try:
+        print(f"Scanning '{var.target_directory}' with threshold {var.threshold} and strategy '{var.strategy}'...")
+        hashes_map = get_image_hashes(var)
+    except Exception as e:
+        print(f"An unexpected error occurred during hashing: {e}", file=sys.stderr)
+        sys.exit(1)
+    
+    try:
+        var.duplicate_groups = find_duplicates(hashes_map, threshold=var.threshold)
+    except Exception as e:
+        print(f"An unexpected error occurred while finding duplicates: {e}", file=sys.stderr)
+        sys.exit(1)
+    
+    try:
+        delete_duplicates(var, deletion_strategy=var.strategy)
+    except Exception as e:
+        print(f"An unexpected error occurred during deletion: {e}", file=sys.stderr)
+        sys.exit(1)
+        
+    print("\nProcess finished.")
+
+if __name__ == "__main__":
+    var=Variables()
+    main(var)
+                    </code></pre>
+                    <pre id="functions-py" class="code-content language-python hidden text-white"><code class="language-python">
+import os
+from PIL import Image
+import imagehash
+import sys
+import re
+
+def get_image_hashes(var, hash_size=8, hash_method='dhash'):
+    """
+    Recursively walks through a directory, computes a perceptual hash for each
+    image file, and stores it in the image_hashes dictionary.
+    """
+    print(f"Scanning directory: {var.target_directory}")
+    
+    for dirpath, _, filenames in os.walk(var.target_directory):
+        for filename in filenames:
+            file_path = os.path.join(dirpath, filename)
+            
+            if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
+                continue
+
+            try:
+                with Image.open(file_path) as img:
+                    img = img.convert('RGB')
+                    image_hash = imagehash.dhash(img, hash_size=hash_size)
+
+                    hash_str = str(image_hash)
+                    if hash_str in var.image_hashes:
+                        var.image_hashes[hash_str].append(file_path)
+                    else:
+                        var.image_hashes[hash_str] = [file_path]
+            
+            except Exception as e:
+                print(f"Could not process file {file_path}: {e}", file=sys.stderr)
+                continue
+    
+    print("Scanning complete.")
+    return var.image_hashes
+
+def find_duplicates(hashes_map, threshold=10):
+    """
+    Finds groups of exact and near-duplicate images based on their hashes.
+    """
+    duplicates = []
+    processed_hashes = set()
+    
+    for hash_str, file_paths in hashes_map.items():
+        if hash_str in processed_hashes:
+            continue
+        
+        current_group = file_paths[:]
+        processed_hashes.add(hash_str)
+        
+        if threshold > 0:
+            for other_hash_str, other_file_paths in hashes_map.items():
+                if hash_str != other_hash_str and other_hash_str not in processed_hashes:
+                    try:
+                        hash1 = imagehash.hex_to_hash(hash_str)
+                        hash2 = imagehash.hex_to_hash(other_hash_str)
+                        if hash1 - hash2 <= threshold:
+                            current_group.extend(other_file_paths)
+                            processed_hashes.add(other_hash_str)
+                    except Exception as e:
+                        print(f"Error comparing hashes: {e}", file=sys.stderr)
+                        continue
+
+        if len(current_group) > 1:
+            duplicates.append(current_group)
+    
+    return duplicates
+
+def delete_duplicates(var, deletion_strategy='keep_first'):
+    def numeric_key(path):
+        filename = os.path.splitext(os.path.basename(path))[0]
+        numbers = re.findall(r'\d+', filename)
+        return tuple(int(num) for num in numbers) if numbers else (float('inf'),)
+
+    def original_file_key(path):
+        return 'copy' in os.path.basename(path).lower()
+
+    if not var.duplicate_groups:
+        print("No duplicate images to delete.")
+        return
+
+    var.duplicate_groups.sort(key=lambda group: numeric_key(group[0]))
+    print(f"\nFound {len(var.duplicate_groups)} duplicate groups.")
+    
+    files_to_delete = []
+    
+    for group in var.duplicate_groups:
+        group.sort(key=original_file_key)
+
+        if deletion_strategy == 'keep_first':
+            files_to_delete.extend(group[1:])
+        elif deletion_strategy == 'keep_smallest':
+            files_and_sizes = [(path, os.path.getsize(path)) for path in group]
+            files_and_sizes.sort(key=lambda x: x[1])
+            files_to_delete.extend([path for path, _ in files_and_sizes[1:]])
+    
+    print("\n--- Dry Run: Duplicate files ---")
+    for group in var.duplicate_groups:
+        print(f"{group[0]}: {group[1:]}")
+    print("-----------------------------------")
+    
+    response = input(f"\nAre you sure you want to delete {len(files_to_delete)} files? (yes/no): ").lower()
+    
+    if response in ['yes', 'y']:
+        deleted_count = 0
+        for file_path in files_to_delete:
+            try:
+                os.remove(file_path)
+                deleted_count += 1
+                print(f"Deleted: {file_path}")
+            except OSError as e:
+                print(f"Error deleting {file_path}: {e}", file=sys.stderr)
+        
+        print(f"\nSuccessfully deleted {deleted_count} files.")
+    else:
+        print("Deletion cancelled by user.")
+                    </code></pre>
+                    <pre id="variables-py" class="code-content language-python hidden text-white"><code class="language-python">
+class Variables:
+    def __init__(self):
+        self.target_directory = None
+        self.threshold = None
+        self.strategy = None
+        self.image_hashes = {}
+        self.duplicate_groups = []
+                    </code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- How to Use Section -->
+        <section id="how-to-use" class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+            <div class="text-center mb-8">
+                <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Get Started</h3>
+                <p class="max-w-2xl mx-auto mt-3 text-lg text-slate-600">
+                    Ready to try it out? Follow these simple steps to run the tool on your own computer. You'll need Python and the required libraries installed.
+                </p>
+            </div>
+            <div class="space-y-6">
+                <div>
+                    <h4 class="font-semibold text-lg text-slate-800 mb-2">1. Install Dependencies</h4>
+                    <p class="text-slate-600 mb-2">Open your terminal or command prompt and run this command to install the necessary libraries.</p>
+                    <div class="bg-slate-800 rounded-md p-3 text-white font-mono text-sm relative">
+                        <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded">Copy</button>
+                        <code>pip install imagehash Pillow</code>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-lg text-slate-800 mb-2">2. Run the Script</h4>
+                    <p class="text-slate-600 mb-2">Navigate to the project directory in your terminal and run the `main.py` script, followed by the path to the folder you want to scan.</p>
+                     <div class="bg-slate-800 rounded-md p-3 text-white font-mono text-sm relative">
+                        <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded">Copy</button>
+                        <code>python main.py "path/to/your/image/directory"</code>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-lg text-slate-800 mb-2">3. Use Optional Arguments (Optional)</h4>
+                    <p class="text-slate-600 mb-2">Customize the run by adding flags for threshold or deletion strategy.</p>
+                     <div class="bg-slate-800 rounded-md p-3 text-white font-mono text-sm relative">
+                        <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded">Copy</button>
+                        <code>python main.py "path/to/your/photos" --threshold 5 --strategy keep_smallest</code>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-8 border-t border-slate-200 mt-16">
+        <p class="text-slate-500">Interactive Explainer created to demonstrate the Python Duplicate Image Finder project.</p>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Mobile Menu Toggle
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    // Close mobile menu when a link is clicked
+    document.querySelectorAll('#mobile-menu a').forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+        });
+    });
+
+    // Interactive Flowchart Logic
+    const steps = document.querySelectorAll('.flow-step');
+    const explanationBox = document.getElementById('explanation-box');
+    const explanations = {
+        'step-1': {
+            title: 'Step 1: Parsing User Input',
+            description: 'The application starts by reading the command-line arguments provided by the user. It uses the `argparse` library to define the required directory path and optional arguments like `--threshold` and `--strategy`. This makes the tool flexible and configurable directly from the terminal.',
+            code: `parser = argparse.ArgumentParser(...)
+parser.add_argument("directory", type=str, ...)
+parser.add_argument("--threshold", type=int, default=10, ...)
+parser.add_argument("--strategy", type=str, default='keep_first', ...)`
+        },
+        'step-2': {
+            title: 'Step 2: Scanning and Hashing Images',
+            description: 'The script recursively walks through the target directory. For each image file, it opens the image, converts it to a standard format, and computes its perceptual hash using the `imagehash` library. Each hash and its corresponding file path are stored in a dictionary.',
+            code: `for dirpath, _, filenames in os.walk(var.target_directory):
+    for filename in filenames:
+        # ...
+        with Image.open(file_path) as img:
+            img = img.convert('RGB')
+            image_hash = imagehash.dhash(img)
+            # ... store hash_str and file_path`
+        },
+        'step-3': {
+            title: 'Step 3: Finding Duplicate Groups',
+            description: 'With all hashes collected, this step compares every hash against every other hash. It calculates the Hamming distance between them. If the distance is less than or equal to the specified threshold, the images are considered duplicates and grouped together.',
+            code: `for hash_str, file_paths in hashes_map.items():
+    # ...
+    for other_hash_str, other_file_paths in hashes_map.items():
+        # ...
+        hash1 = imagehash.hex_to_hash(hash_str)
+        hash2 = imagehash.hex_to_hash(other_hash_str)
+        if hash1 - hash2 <= threshold:
+            current_group.extend(other_file_paths)`
+        },
+        'step-4': {
+            title: 'Step 4: Confirming and Deleting Files',
+            description: 'Finally, the script presents a "dry run" list of all duplicate files it plans to delete. It prompts the user for a final "yes/no" confirmation. If confirmed, it proceeds to delete the files from the disk based on the chosen deletion strategy, providing a safe way to manage the process.',
+            code: `print("\\n--- Dry Run: Duplicate files ---")
+# ...
+response = input(f"\\nAre you sure you want to delete {len(files_to_delete)} files? (yes/no): ").lower()
+if response in ['yes', 'y']:
+    for file_path in files_to_delete:
+        os.remove(file_path)`
+        }
+    };
+
+    function updateExplanation(stepId) {
+        const content = explanations[stepId];
+        if (!content) {
+            explanationBox.innerHTML = '<p class="text-center text-slate-500">Click a step above to see details.</p>';
+            return;
+        }
+        explanationBox.innerHTML = `
+            <h4 class="font-bold text-xl text-slate-800 mb-2">${content.title}</h4>
+            <p class="text-slate-600 mb-4">${content.description}</p>
+            <div class="bg-slate-800 rounded-md p-3 text-white font-mono text-sm">
+                <pre><code>${content.code}</code></pre>
+            </div>
+        `;
+    }
+
+    steps.forEach(step => {
+        step.addEventListener('click', () => {
+            steps.forEach(s => s.classList.remove('active'));
+            step.classList.add('active');
+            updateExplanation(step.id);
+        });
+    });
+
+    // Initialize with the first step active
+    document.getElementById('step-1').click();
+
+    // Code Explorer Tabs
+    const tabs = document.querySelectorAll('.code-tab');
+    const contents = document.querySelectorAll('.code-content');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            const target = tab.getAttribute('data-target');
+            contents.forEach(content => {
+                if (content.id === target) {
+                    content.classList.remove('hidden');
+                } else {
+                    content.classList.add('hidden');
+                }
+            });
+        });
+    });
+    // Initialize with the first tab active
+    tabs[0].click();
+
+    // Copy to Clipboard
+    document.querySelectorAll('.copy-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const codeElement = e.target.nextElementSibling;
+            const code = codeElement.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                e.target.innerText = 'Copied!';
+                setTimeout(() => {
+                    e.target.innerText = 'Copy';
+                }, 2000);
+            });
+        });
+    });
+});
+</script>
+
+</body>
+</html>
