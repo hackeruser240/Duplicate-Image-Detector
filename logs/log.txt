@@ -1,16 +1,16 @@
-15-Aug-2025 01:02:30 AM - __main__ - INFO - Scanning 'D:\Pictures\Career' with threshold 10 and strategy 'keep_first'...
-15-Aug-2025 01:02:30 AM - root - INFO - Scanning directory: D:\Pictures\Career
-15-Aug-2025 01:02:30 AM - root - INFO - Scanning complete.
-15-Aug-2025 01:02:30 AM - root - INFO - 
+15-Aug-2025 01:14:56 AM - __main__ - INFO - Scanning 'D:\Pictures\Career' with threshold 10 and strategy 'keep_first'...
+15-Aug-2025 01:14:56 AM - root - INFO - Scanning directory: D:\Pictures\Career
+15-Aug-2025 01:14:56 AM - root - INFO - Scanning complete.
+15-Aug-2025 01:14:56 AM - root - INFO - 
 Found 5 duplicate groups.
-15-Aug-2025 01:02:30 AM - root - INFO - 
+15-Aug-2025 01:14:56 AM - root - INFO - 
 --- Dry Run: Duplicate files ---
-15-Aug-2025 01:02:30 AM - root - INFO - D:\Pictures\Career\1705595294972.jpeg: ['D:\\Pictures\\Career\\1705595294972 - Copy.jpeg']
-15-Aug-2025 01:02:30 AM - root - INFO - D:\Pictures\Career\1710843212806.jpeg: ['D:\\Pictures\\Career\\1710843212806 - Copy.jpeg']
-15-Aug-2025 01:02:30 AM - root - INFO - D:\Pictures\Career\1717391525215.jpg: ['D:\\Pictures\\Career\\1717391525215 - Copy.jpg']
-15-Aug-2025 01:02:30 AM - root - INFO - D:\Pictures\Career\1726468050569.jpeg: ['D:\\Pictures\\Career\\1726468050569 - Copy.jpeg']
-15-Aug-2025 01:02:30 AM - root - INFO - D:\Pictures\Career\1727118713114.jpeg: ['D:\\Pictures\\Career\\1727118713114 - Copy.jpeg']
-15-Aug-2025 01:02:30 AM - root - INFO - -----------------------------------
-15-Aug-2025 01:02:34 AM - root - INFO - Deletion cancelled by user.
-15-Aug-2025 01:02:34 AM - __main__ - INFO - 
+15-Aug-2025 01:14:56 AM - root - INFO - D:\Pictures\Career\1705595294972.jpeg: ['D:\\Pictures\\Career\\1705595294972 - Copy.jpeg']
+15-Aug-2025 01:14:56 AM - root - INFO - D:\Pictures\Career\1710843212806.jpeg: ['D:\\Pictures\\Career\\1710843212806 - Copy.jpeg']
+15-Aug-2025 01:14:56 AM - root - INFO - D:\Pictures\Career\1717391525215.jpg: ['D:\\Pictures\\Career\\1717391525215 - Copy.jpg']
+15-Aug-2025 01:14:56 AM - root - INFO - D:\Pictures\Career\1726468050569.jpeg: ['D:\\Pictures\\Career\\1726468050569 - Copy.jpeg']
+15-Aug-2025 01:14:56 AM - root - INFO - D:\Pictures\Career\1727118713114.jpeg: ['D:\\Pictures\\Career\\1727118713114 - Copy.jpeg']
+15-Aug-2025 01:14:56 AM - root - INFO - -----------------------------------
+15-Aug-2025 01:14:57 AM - root - INFO - Deletion cancelled by user.
+15-Aug-2025 01:14:57 AM - __main__ - INFO - 
 Process finished.

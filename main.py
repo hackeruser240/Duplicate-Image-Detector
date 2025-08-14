@@ -6,21 +6,33 @@ from scripts.functions import get_image_hashes, find_duplicates, delete_duplicat
 from scripts.variables import Variables
 
 def loggerSetup():
-    # Set up the logger to configure the root logger
+    # 1. Create the logs directory
     if not os.path.exists("logs"):
         os.mkdir("logs")
     log_file = os.path.join("logs", 'log.txt')
-    
-    # Basic configuration for all loggers
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        datefmt='%d-%b-%Y %I:%M:%S %p',
-        handlers=[
-            logging.FileHandler(log_file, "w"),
-            logging.StreamHandler()
-        ]
-    )
+
+    # 2. Get the root logger
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    # 3. Create the FileHandler and its custom formatter
+    file_handler = logging.FileHandler(log_file, "w")
+    file_handler.setLevel(logging.DEBUG)
+    file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%d-%b-%Y %I:%M:%S %p')
+    file_handler.setFormatter(file_formatter)
+
+    # 4. Create the StreamHandler and its custom formatter
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(logging.INFO)
+    # This formatter is simpler for console output
+    console_formatter = logging.Formatter('%(levelname)s - %(message)s')
+    console_handler.setFormatter(console_formatter)
+
+    # 5. Add both handlers to the logger
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+    return logger
 
 def main(var):
     """
