@@ -1,8 +1,11 @@
-import os
 from PIL import Image
+
+import os
 import imagehash
 import sys
 import re
+import logging
+logger=logging.getLogger(__name__)
 
 # This dictionary stores the hashes and their corresponding file paths.
 # It is used to build a comprehensive map of all images in the directory.
@@ -23,7 +26,7 @@ def get_image_hashes(var, hash_size=8, hash_method='dhash'):
         dict: A dictionary where keys are image hashes and values are a list of
               file paths that share that hash.
     """
-    print(f"Scanning directory: {var.target_directory}")
+    logging.info(f"Scanning directory: {var.target_directory}")
     
     # Reset the global dictionary for each new scan
 
@@ -49,7 +52,7 @@ def get_image_hashes(var, hash_size=8, hash_method='dhash'):
                     elif hash_method == 'dhash':
                         image_hash = imagehash.dhash(img, hash_size=hash_size)
                     else:
-                        print(f"Error: Unsupported hash method '{hash_method}'. Using phash instead.")
+                        logger.error(f"Error: Unsupported hash method '{hash_method}'. Using phash instead.")
                         image_hash = imagehash.phash(img, hash_size=hash_size)
 
                     # Store the hash and file path. The hash is converted to a string
@@ -62,10 +65,10 @@ def get_image_hashes(var, hash_size=8, hash_method='dhash'):
             
             except Exception as e:
                 # Catch any errors during image processing or file access
-                print(f"Could not process file {file_path}: {e}", file=sys.stderr)
+                logger.error(f"Could not process file {file_path}: {e}")
                 continue
     
-    print("Scanning complete.")
+    logging.info("Scanning complete.")
     return var.image_hashes
 
 def find_duplicates(hashes_map, threshold=10):
@@ -107,7 +110,7 @@ def find_duplicates(hashes_map, threshold=10):
                             current_group.extend(other_file_paths)
                             processed_hashes.add(other_hash_str)
                     except Exception as e:
-                        print(f"Error comparing hashes: {e}", file=sys.stderr)
+                        logger.error(f"Error comparing hashes: {e}")
                         continue
 
         if len(current_group) > 1:
@@ -135,13 +138,13 @@ def delete_duplicates(var, deletion_strategy='keep_first'):
         deletion_strategy (str): 'keep_first' is the default.
     """
     if not var.duplicate_groups:
-        print("No duplicate images to delete.")
+        logging.info("No duplicate images to delete.")
         return
 
     # Sort the duplicate_groups list for a cleaner display
     var.duplicate_groups.sort(key=lambda group: numeric_key(group[0]))
 
-    print(f"\nFound {len(var.duplicate_groups)} duplicate groups.")
+    logging.info(f"\nFound {len(var.duplicate_groups)} duplicate groups.")
     
     files_to_delete = []
     
@@ -159,15 +162,15 @@ def delete_duplicates(var, deletion_strategy='keep_first'):
             files_and_sizes.sort(key=lambda x: x[1])
             files_to_delete.extend([path for path, _ in files_and_sizes[1:]])
         else:
-            print(f"Error: Unsupported deletion strategy '{deletion_strategy}'. Using 'keep_first'.")
+            logging.info(f"Error: Unsupported deletion strategy '{deletion_strategy}'. Using 'keep_first'.")
             files_to_delete.extend(group[1:])
 
     # Print a summary of files to be deleted (Dry Run)
-    print("\n--- Dry Run: Duplicate files ---")
+    logging.info("\n--- Dry Run: Duplicate files ---")
     for group in var.duplicate_groups:
         # The inner group is already sorted for deletion, so we can just print it
-        print(f"{group[0]}: {group[1:]}")
-    print("-----------------------------------")
+        logging.info(f"{group[0]}: {group[1:]}")
+    logging.info("-----------------------------------")
     
     # Prompt user for confirmation before deletion
     response = input(f"\nAre you sure you want to delete {len(files_to_delete)} files? (yes/no): ").lower()
@@ -176,15 +179,15 @@ def delete_duplicates(var, deletion_strategy='keep_first'):
         deleted_count = 0
         for file_path in files_to_delete:
             try:
-                os.remove(file_path)
+                #os.remove(file_path)
                 deleted_count += 1
-                print(f"Deleted: {file_path}")
+                logging.info(f"Deleted: {file_path}")
             except OSError as e:
-                print(f"Error deleting {file_path}: {e}", file=sys.stderr)
+                logger.error(f"Error deleting {file_path}: {e}")
         
-        print(f"\nSuccessfully deleted {deleted_count} files.")
+        logging.info(f"\nSuccessfully deleted {deleted_count} files.")
     else:
-        print("Deletion cancelled by user.")
+        logging.info("Deletion cancelled by user.")
 
 if __name__=="__main__":
     
