@@ -6,28 +6,21 @@ from scripts.functions import get_image_hashes, find_duplicates, delete_duplicat
 from scripts.variables import Variables
 
 def loggerSetup():
-
+    # Set up the logger to configure the root logger
     if not os.path.exists("logs"):
         os.mkdir("logs")
-    log_file=os.path.join("logs",'log.txt')
-
-    logger=logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
+    log_file = os.path.join("logs", 'log.txt')
     
-    file_handler=logging.FileHandler(log_file,"w")
-    file_handler.setLevel(logging.DEBUG)
-    formatter=logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s',datefmt='%d-%b-%Y %I:%M:%S %p')
-    file_handler.setFormatter(formatter)
-
-    console_handler=logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    formatter=logging.Formatter('%(levelname)s - %(message)s')
-    console_handler.setFormatter(formatter)    
-
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
-
-    return logger
+    # Basic configuration for all loggers
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%d-%b-%Y %I:%M:%S %p',
+        handlers=[
+            logging.FileHandler(log_file, "w"),
+            logging.StreamHandler()
+        ]
+    )
 
 def main(var):
     """
@@ -112,8 +105,8 @@ def main(var):
 
 if __name__ == "__main__":
 
-    # 0. Setting the logger:
-    logger=loggerSetup()
-    
+    loggerSetup()
+    logger=logging.getLogger(__name__)
+
     var=Variables()
     main(var)
