@@ -4,35 +4,7 @@ import os
 import logging
 from scripts.functions import get_image_hashes, find_duplicates, delete_duplicates
 from scripts.variables import Variables
-
-def loggerSetup():
-    # 1. Create the logs directory
-    if not os.path.exists("logs"):
-        os.mkdir("logs")
-    log_file = os.path.join("logs", 'log.txt')
-
-    # 2. Get the root logger
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-
-    # 3. Create the FileHandler and its custom formatter
-    file_handler = logging.FileHandler(log_file, "w")
-    file_handler.setLevel(logging.DEBUG)
-    file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%d-%b-%Y %I:%M:%S %p')
-    file_handler.setFormatter(file_formatter)
-
-    # 4. Create the StreamHandler and its custom formatter
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(logging.INFO)
-    # This formatter is simpler for console output
-    console_formatter = logging.Formatter('%(levelname)s - %(message)s')
-    console_handler.setFormatter(console_formatter)
-
-    # 5. Add both handlers to the logger
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
-
-    return logger
+from scripts.logger import loggerSetup
 
 def main(var):
     """
@@ -41,8 +13,7 @@ def main(var):
     This function handles command-line arguments using the argparse module,
     orchestrates the workflow by calling functions from the scripts.functions
     module, and provides a user interface for confirming deletions.
-    """
-    
+    """   
 
     # 1. Create a new ArgumentParser object
     parser = argparse.ArgumentParser(
@@ -102,23 +73,27 @@ def main(var):
     # Step 2: Find duplicate groups
     try:
         var.duplicate_groups = find_duplicates(hashes_map, threshold=var.threshold)
+        logger.info(f"Successfully found duplicate groups")
     except Exception as e:
-        logger.info(f"An unexpected error occurred while finding duplicates: {e}")
+        logger.error(f"An unexpected error occurred while finding duplicates: {e}")
         sys.exit(1)
     
     # Step 3: Delete duplicates after user confirmation
     try:
         delete_duplicates(var, deletion_strategy=var.strategy)
     except Exception as e:
-        logger.info(f"An unexpected error occurred during deletion: {e}")
+        logger.error(f"An unexpected error occurred during deletion: {e}")
         sys.exit(1)
         
     logger.info("\nProcess finished.")
 
 if __name__ == "__main__":
 
+    # Configure the root logger once
     loggerSetup()
-    logger=logging.getLogger(__name__)
+    
+    # Get a logger instance for this module; it will inherit handlers from the root logger
+    logger = logging.getLogger(__name__)
 
     var=Variables()
     main(var)
