@@ -91,6 +91,15 @@ if __name__ == "__main__":
         help="The strategy to use for deletion: 'keep_first' or 'keep_smallest'. (default: 'keep_first')"
     )
     
+    
+
+    parser.add_argument(
+        "--delete_files",
+        type=str,
+        default='yes',
+        help="Do you want to delete the files? Yes or No."
+    )
+
     try:
         args = parser.parse_args()
     except Exception as e:
@@ -104,5 +113,6 @@ if __name__ == "__main__":
     var.target_directory = args.directory
     var.threshold = args.threshold
     var.strategy = args.strategy
+    var.delete_files=args.delete_files
 
     main(var)

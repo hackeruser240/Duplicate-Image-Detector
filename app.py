@@ -15,7 +15,6 @@ from main import find_and_group_duplicates
 from scripts.functions import delete_duplicates
 
 import logging
-import sys
 import os
 
 # Step 1: Create a custom handler to redirect logs to the Text widget
@@ -47,6 +46,11 @@ class MyTinkerApp:
         self.root.title("Image Duplication Detector")
         self.root.geometry("600x700")
         self.root.resizable(True, True)
+        
+        # Initialize the Variables object here to make it accessible
+        self.var = Variables()
+        # Initialize a Tkinter BooleanVar and link it to the variable class
+        self.delete_checkbox_var = tk.BooleanVar()
 
         # Create a frame to hold all the input widgets
         input_frame = tk.Frame(root)
@@ -82,6 +86,10 @@ class MyTinkerApp:
         self.strategy_menu = tk.OptionMenu(input_frame, self.strategy_var, *self.strategy_options)
         self.strategy_menu.grid(row=5, column=1, padx=5, pady=5, sticky="ew")
         
+        # New Checkbutton for deletion, linked to the BooleanVar
+        self.delete_check = tk.Checkbutton(input_frame, text="Delete duplicates automatically", variable=self.delete_checkbox_var)
+        self.delete_check.grid(row=6, column=0, columnspan=2, pady=10)
+
         # Analyze Button
         self.analyze_button = tk.Button(root, text="Analyze and Run", command=self.analyze_and_run)
         self.analyze_button.pack(pady=10)
@@ -101,7 +109,7 @@ class MyTinkerApp:
         # Step 3: Configure the root logger directly inside the app
         root_logger = logging.getLogger()
         root_logger.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%d-%b-%Y %I:%M:%S %p')
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
         # Clear any existing handlers to prevent duplicate messages
         if root_logger.hasHandlers():
@@ -111,7 +119,6 @@ class MyTinkerApp:
         if not os.path.exists("logs"):
             os.mkdir("logs")
         log_file = os.path.join("logs", 'log.txt')
-
         file_handler = logging.FileHandler(log_file, "w")
         file_handler.setFormatter(formatter)
         root_logger.addHandler(file_handler)
@@ -138,22 +145,26 @@ class MyTinkerApp:
         input_directory = self.directory_entry.get()
         threshold_value = self.threshold_entry.get()
         strategy_value = self.strategy_var.get()
-
+        
+        # Get the state of the checkbox and update the variable
+        self.var.delete_files = self.delete_checkbox_var.get()
+        
         if not input_directory:
             self.status_label.config(text="Please select a directory first!")
             return
 
         self.status_label.config(text="Analysis started...")
         self.root.update_idletasks()
+        
+        logger = logging.getLogger(__name__)
 
         try:
-            var = Variables()
-            var.target_directory = input_directory
-            var.threshold = int(threshold_value) if threshold_value else 10
-            var.strategy = strategy_value
+            self.var.target_directory = input_directory
+            self.var.threshold = int(threshold_value) if threshold_value else 10
+            self.var.strategy = strategy_value
             
             # Step 1: Find the duplicates using the new function
-            duplicate_groups = find_and_group_duplicates(var)
+            duplicate_groups = find_and_group_duplicates(self.var)
 
             if not duplicate_groups:
                 self.status_label.config(text="No duplicates or an error occurred.")
@@ -163,18 +174,14 @@ class MyTinkerApp:
             total_files_to_delete = sum(len(group) - 1 for group in duplicate_groups)
             
             if total_files_to_delete > 0:
-                # Step 2: Ask for user confirmation using a dialog box
-                confirm = messagebox.askyesno(
-                    "Confirm Deletion",
-                    f"Found {total_files_to_delete} duplicate files. Are you sure you want to delete them?"
-                )
-                
-                if confirm:
-                    # If the user confirms, call the deletion function
-                    delete_duplicates(var, deletion_strategy=var.strategy)
+                if self.var.delete_files:
+                    # If the checkbox is checked, proceed with deletion
+                    logger.info("Deletion checkbox is checked. Proceeding with deletion...")
+                    delete_duplicates(self.var, deletion_strategy=self.var.strategy)
                     self.status_label.config(text="Analysis finished. Duplicates deleted.")
                 else:
-                    self.status_label.config(text="Deletion cancelled by user.")
+                    # If the checkbox is not checked, just report the findings
+                    self.status_label.config(text=f"Analysis finished. Found {total_files_to_delete} duplicates. Deletion not requested.")
             else:
                 self.status_label.config(text="Analysis finished. No duplicates found.")
 
@@ -184,8 +191,6 @@ class MyTinkerApp:
             traceback.print_exc()
 
 def main():
-    # We no longer need to call loggerSetup() here
-    # loggerSetup()
     root = tk.Tk()
     app = MyTinkerApp(root)
     root.mainloop()

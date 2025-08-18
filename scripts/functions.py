@@ -170,9 +170,10 @@ def delete_duplicates(var, deletion_strategy='keep_first'):
     logger.info("-----------------------------------")
     
     # Prompt user for confirmation before deletion
-    response = input(f"\nAre you sure you want to delete {len(files_to_delete)} files? (yes/no): ").lower()
+    #response = input(f"\nAre you sure you want to delete {len(files_to_delete)} files? (yes/no): ").lower()
+    response=var.delete_files
     
-    if response in ['yes', 'y']:
+    if response in ['yes', 'y', True]:
         deleted_count = 0
         for file_path in files_to_delete:
             try:
