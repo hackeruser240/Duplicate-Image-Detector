@@ -1,12 +1,22 @@
+# Import the Tkinter module
 import tkinter as tk
-from tkinter import filedialog
+# Import the filedialog and messagebox modules
+from tkinter import filedialog, messagebox
+# Import the traceback module for detailed error handling
 import traceback
 
+# Import other necessary project modules
 from scripts.variables import Variables
-from scripts.logger import loggerSetup
+# We no longer need to import loggerSetup as we handle logging here
+# from scripts.logger import loggerSetup 
+# Import the new function from main.py for finding duplicates
+from main import find_and_group_duplicates
+# Import the delete_duplicates function directly
+from scripts.functions import delete_duplicates
 
 import logging
 import sys
+import os
 
 # Step 1: Create a custom handler to redirect logs to the Text widget
 class TkinterTextHandler(logging.Handler):
@@ -18,7 +28,6 @@ class TkinterTextHandler(logging.Handler):
         self.text_widget = text_widget
         self.text_widget.config(state=tk.DISABLED) # Make the widget read-only
         self.setFormatter(logging.Formatter('%(message)s'))
-
 
     def emit(self, record):
         # Format the log message
@@ -32,13 +41,12 @@ class TkinterTextHandler(logging.Handler):
         # Scroll to the bottom to show the newest log message
         self.text_widget.see(tk.END)
 
-
 class MyTinkerApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Image Duplication Detector")
         self.root.geometry("600x700")
-        self.root.resizable(False, True)
+        self.root.resizable(True, True)
 
         # Create a frame to hold all the input widgets
         input_frame = tk.Frame(root)
@@ -69,7 +77,7 @@ class MyTinkerApp:
         
         self.strategy_var = tk.StringVar(root)
         self.strategy_options = ['keep_first', 'keep_smallest']
-        self.strategy_var.set(self.strategy_options[0])  # Set default value
+        self.strategy_var.set(self.strategy_options[0])
 
         self.strategy_menu = tk.OptionMenu(input_frame, self.strategy_var, *self.strategy_options)
         self.strategy_menu.grid(row=5, column=1, padx=5, pady=5, sticky="ew")
@@ -82,7 +90,7 @@ class MyTinkerApp:
         self.status_label.pack(pady=10)
         
         # Step 2: Add a Text widget for displaying logs
-        self.log_text = tk.Text(root)
+        self.log_text = tk.Text(root, height=15, width=70)
         self.log_text.pack(pady=10)
 
         # Add a scrollbar to the text widget
@@ -90,19 +98,27 @@ class MyTinkerApp:
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y, padx=5)
         self.log_text.config(yscrollcommand=scrollbar.set)
 
-        # Step 3: Redirect logging to the new Text widget
-        # Get the root logger instance
+        # Step 3: Configure the root logger directly inside the app
         root_logger = logging.getLogger()
-        
-        # Remove the old console handler
-        for handler in root_logger.handlers[:]:
-            if isinstance(handler, logging.StreamHandler):
-                root_logger.removeHandler(handler)
+        root_logger.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%d-%b-%Y %I:%M:%S %p')
 
-        # Add the new Tkinter text handler
+        # Clear any existing handlers to prevent duplicate messages
+        if root_logger.hasHandlers():
+            root_logger.handlers.clear()
+
+        # Add the FileHandler to write to log.txt
+        if not os.path.exists("logs"):
+            os.mkdir("logs")
+        log_file = os.path.join("logs", 'log.txt')
+
+        file_handler = logging.FileHandler(log_file, "w")
+        file_handler.setFormatter(formatter)
+        root_logger.addHandler(file_handler)
+
+        # Add the custom TkinterTextHandler for the GUI
         self.logger_handler = TkinterTextHandler(self.log_text)
         root_logger.addHandler(self.logger_handler)
-
 
     def browse_directory(self):
         """
@@ -117,8 +133,7 @@ class MyTinkerApp:
 
     def analyze_and_run(self):
         """
-        This function acts as the bridge. It gets the user input from the GUI,
-        sets up the variables, and then calls the main function from main.py.
+        This function orchestrates the analysis and deletion process for the GUI.
         """
         input_directory = self.directory_entry.get()
         threshold_value = self.threshold_entry.get()
@@ -132,23 +147,45 @@ class MyTinkerApp:
         self.root.update_idletasks()
 
         try:
-            from main import main
-            
             var = Variables()
             var.target_directory = input_directory
             var.threshold = int(threshold_value) if threshold_value else 10
             var.strategy = strategy_value
+            
+            # Step 1: Find the duplicates using the new function
+            duplicate_groups = find_and_group_duplicates(var)
 
-            main(var)
-            self.status_label.config(text="Analysis finished successfully.")
+            if not duplicate_groups:
+                self.status_label.config(text="No duplicates or an error occurred.")
+                return
+
+            # Count the number of files to be deleted
+            total_files_to_delete = sum(len(group) - 1 for group in duplicate_groups)
+            
+            if total_files_to_delete > 0:
+                # Step 2: Ask for user confirmation using a dialog box
+                confirm = messagebox.askyesno(
+                    "Confirm Deletion",
+                    f"Found {total_files_to_delete} duplicate files. Are you sure you want to delete them?"
+                )
+                
+                if confirm:
+                    # If the user confirms, call the deletion function
+                    delete_duplicates(var, deletion_strategy=var.strategy)
+                    self.status_label.config(text="Analysis finished. Duplicates deleted.")
+                else:
+                    self.status_label.config(text="Deletion cancelled by user.")
+            else:
+                self.status_label.config(text="Analysis finished. No duplicates found.")
+
         except Exception as e:
             error_message = f"An error occurred: {e}"
             self.status_label.config(text=error_message)
             traceback.print_exc()
 
 def main():
-    # Call the existing logger setup from your scripts folder first
-    loggerSetup()
+    # We no longer need to call loggerSetup() here
+    # loggerSetup()
     root = tk.Tk()
     app = MyTinkerApp(root)
     root.mainloop()
