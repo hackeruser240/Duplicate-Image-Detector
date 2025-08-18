@@ -14,7 +14,7 @@ def main(var):
     scripts.functions module. It is designed to be called by either the
     command-line interface or a graphical user interface.
     """   
-    # This block now contains only the core logic that both CLI and GUI will use.
+    logger = logging.getLogger(__name__)
     
     # Verify that the provided path is a valid directory
     if not os.path.isdir(var.target_directory):
