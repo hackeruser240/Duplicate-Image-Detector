@@ -130,9 +130,17 @@ def delete_duplicates(var, deletion_strategy='keep_first'):
     logger.info("Starting deletion process...")
     files_to_delete = []
 
+    # This is the corrected and restored logic to ensure the "original" file is kept.
     for group in var.duplicate_groups:
         if deletion_strategy == 'keep_first':
-            # Keep the first file, delete the rest
+            # We sort the group to ensure that the original file (without " - Copy")
+            # is always at the beginning of the list, so it will be kept.
+            def original_file_key(file_path):
+                # A simple check to see if the filename contains " - Copy"
+                # Files without the string will have a lower (0) value and be sorted first.
+                return " - Copy" in os.path.basename(file_path)
+
+            group.sort(key=original_file_key)
             files_to_delete.extend(group[1:])
         elif deletion_strategy == 'keep_smallest':
             # Sort by file size (smallest first) and delete all but the smallest
