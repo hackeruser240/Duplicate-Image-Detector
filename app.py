@@ -51,6 +51,7 @@ class MyTinkerApp:
         self.var = Variables()
         # Initialize a Tkinter BooleanVar and link it to the variable class
         self.delete_checkbox_var = tk.BooleanVar()
+        self.var.threshold=10
 
         # Create a frame to hold all the input widgets
         input_frame = tk.Frame(root)
@@ -73,6 +74,7 @@ class MyTinkerApp:
         self.threshold_label = tk.Label(input_frame, text="Enter Threshold")
         self.threshold_label.grid(row=4, column=0, padx=5, pady=5, sticky="e")
         self.threshold_entry = tk.Entry(input_frame, width=17)
+        self.threshold_entry.insert(0, str(self.var.threshold))
         self.threshold_entry.grid(row=4, column=1, padx=5, pady=5)
 
         # Deletion Strategy Dropdown
@@ -143,9 +145,13 @@ class MyTinkerApp:
         """
         directory = filedialog.askdirectory()
         if directory:
+            # THIS IS THE FIX: Normalize the path immediately
+            normalized_path = os.path.normpath(directory)
+            
             self.directory_entry.delete(0, tk.END)
-            self.directory_entry.insert(0, directory)
-            self.status_label.config(text=f"Selected: {directory}")
+            self.directory_entry.insert(0, normalized_path)
+            self.status_label.config(text=f"Selected: {normalized_path}")
+            #self.logger.info(f"Directory selected: {normalized_path}")
 
     def clear_log(self):
         """
@@ -183,6 +189,10 @@ class MyTinkerApp:
             
             # Step 1: Find the duplicates using the new function
             # The function now returns a new list, which we capture here
+            logger.info("\n***************")
+            logger.info("Starting Script")
+            logger.info("***************\n")
+
             duplicate_groups = find_and_group_duplicates(self.var)
             # We now assign the returned list to our variable object
             self.var.duplicate_groups = duplicate_groups
@@ -205,6 +215,10 @@ class MyTinkerApp:
                     self.status_label.config(text=f"Analysis finished. Found {total_files_to_delete} duplicates. Deletion not requested.")
             else:
                 self.status_label.config(text="Analysis finished. No duplicates found.")
+
+            logger.info("\n************")
+            logger.info("Script Ended")
+            logger.info("************")
 
         except Exception as e:
             error_message = f"An error occurred: {e}"

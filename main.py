@@ -20,9 +20,6 @@ def find_and_group_duplicates(var):
 
     # Step 1: Get all image hashes
     try:
-        logger.info("\n***************")
-        logger.info("Starting Script")
-        logger.info("***************\n")
         logger.info(f"Scanning '{var.target_directory}' with threshold {var.threshold} and strategy '{var.strategy}'...")
         hashes_map = get_image_hashes(var)
     except Exception as e:
