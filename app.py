@@ -1,3 +1,5 @@
+# app.py
+
 from tkinter import filedialog, messagebox
 from scripts.variables import Variables
 from main import find_and_group_duplicates
@@ -7,29 +9,7 @@ import logging
 import os
 import tkinter as tk
 import traceback
-
-
-class TkinterTextHandler(logging.Handler):
-    """
-    A custom logging handler that redirects log messages to a Tkinter Text widget.
-    """
-    def __init__(self, text_widget):
-        super().__init__()
-        self.text_widget = text_widget
-        self.text_widget.config(state=tk.DISABLED) # Make the widget read-only
-        self.setFormatter(logging.Formatter('%(message)s'))
-
-    def emit(self, record):
-        # Format the log message
-        msg = self.format(record)
-        
-        # Enable the widget to insert text, then disable it again
-        self.text_widget.config(state=tk.NORMAL)
-        self.text_widget.insert(tk.END, msg + '\n')
-        self.text_widget.config(state=tk.DISABLED)
-        
-        # Scroll to the bottom to show the newest log message
-        self.text_widget.see(tk.END)
+from gui.helper import setup_gui, setup_logging, browse_directory, clear_log
 
 class MyTinkerApp:
     def __init__(self, root):
@@ -38,110 +18,14 @@ class MyTinkerApp:
         self.root.geometry("600x700")
         self.root.resizable(True, True)
         
-        
+        # 1. Initialize variables
         self.var = Variables()
         self.delete_checkbox_var = tk.BooleanVar()
-        self.var.threshold=10
+        self.var.threshold = 10
 
-        # Create a frame to hold all the input widgets
-        input_frame = tk.Frame(root)
-        input_frame.pack(pady=20)
-    
-        # Directory Input
-        self.label_dir = tk.Label(input_frame, text="Browse or Enter directory.")
-        self.label_dir.grid(row=0, column=0, columnspan=2, pady=5)        
-        self.directory_entry = tk.Entry(input_frame, width=50)
-        self.directory_entry.grid(row=1, column=0, columnspan=2, pady=5)
-        self.button_browse = tk.Button(input_frame, text="Browse Directory", command=self.browse_directory)
-        self.button_browse.grid(row=2, column=0, columnspan=2, pady=5)
-
-        # Separator for visual clarity
-        tk.Frame(input_frame, height=1, bg="gray").grid(row=3, column=0, columnspan=2, sticky="ew", pady=10)
-
-        # Threshold Input
-        self.threshold_label = tk.Label(input_frame, text="Enter Threshold")
-        self.threshold_label.grid(row=4, column=0, padx=5, pady=5, sticky="e")
-        self.threshold_entry = tk.Entry(input_frame, width=17)
-        self.threshold_entry.insert(0, str(self.var.threshold))
-        self.threshold_entry.grid(row=4, column=1, padx=5, pady=5)
-
-        # Deletion Strategy Dropdown
-        self.strategy_label = tk.Label(input_frame, text="Deletion Strategy")
-        self.strategy_label.grid(row=5, column=0, padx=5, pady=5, sticky="e")        
-        self.strategy_var = tk.StringVar(root)
-        self.strategy_options = ['keep_first', 'keep_smallest']
-        self.strategy_var.set(self.strategy_options[0])
-        self.strategy_menu = tk.OptionMenu(input_frame, self.strategy_var, *self.strategy_options)
-        self.strategy_menu.grid(row=5, column=1, padx=5, pady=5, sticky="ew")
-        
-        # New Checkbutton for deletion, linked to the BooleanVar
-        self.delete_check = tk.Checkbutton(input_frame, text="Delete duplicates automatically", variable=self.delete_checkbox_var)
-        self.delete_check.grid(row=6, column=0, columnspan=2, pady=10)
-
-        # Analyze Button
-        self.analyze_button = tk.Button(root, text="Analyze and Run", command=self.analyze_and_run)
-        self.analyze_button.pack(pady=10)        
-        self.status_label = tk.Label(root, text="")
-        self.status_label.pack(pady=5)
-        
-        # --- NEW FRAME FOR LOGS AND BUTTON ---
-        log_frame = tk.Frame(root)
-        log_frame.pack(pady=10)
-        
-        # Add a Text widget for displaying logs inside the frame
-        self.log_text = tk.Text(log_frame, width=70)
-        self.log_text.pack(side=tk.LEFT, fill=tk.Y, expand=True)
-        # Add a scrollbar to the text widget inside the frame
-        scrollbar = tk.Scrollbar(log_frame, command=self.log_text.yview)
-        scrollbar.pack(side=tk.LEFT, fill=tk.Y)
-        self.log_text.config(yscrollcommand=scrollbar.set)        
-        # Add the "Clear Log" button next to the log display
-        self.clear_button = tk.Button(root, text="Clear Log", command=self.clear_log)
-        self.clear_button.pack(side=tk.RIGHT, padx=5)
-        
-        # Step 3: Configure the root logger directly inside the app
-        root_logger = logging.getLogger()
-        root_logger.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-
-        # Clear any existing handlers to prevent duplicate messages
-        if root_logger.hasHandlers():
-            root_logger.handlers.clear()
-
-        # Add the FileHandler to write to log.txt
-        if not os.path.exists("logs"):
-            os.mkdir("logs")
-        log_file = os.path.join("logs", 'log.txt')
-        file_handler = logging.FileHandler(log_file, "w")
-        file_handler.setFormatter(formatter)
-        root_logger.addHandler(file_handler)
-
-        # Add the custom TkinterTextHandler for the GUI
-        self.logger_handler = TkinterTextHandler(self.log_text)
-        root_logger.addHandler(self.logger_handler)
-
-    def browse_directory(self):
-        """
-        Opens a directory selection dialog and puts the selected path
-        into the entry field.
-        """
-        directory = filedialog.askdirectory()
-        if directory:
-            # THIS IS THE FIX: Normalize the path immediately
-            normalized_path = os.path.normpath(directory)
-            
-            self.directory_entry.delete(0, tk.END)
-            self.directory_entry.insert(0, normalized_path)
-            self.status_label.config(text=f"Selected: {normalized_path}")
-            #self.logger.info(f"Directory selected: {normalized_path}")
-
-    def clear_log(self):
-        """
-        Clears all text from the log display widget.
-        """
-        self.log_text.config(state=tk.NORMAL)
-        self.log_text.delete('1.0', tk.END)
-        self.log_text.config(state=tk.DISABLED)
+        # 2. Setup the GUI layout and logging using helper functions
+        setup_gui(self)
+        setup_logging(self)
 
     def analyze_and_run(self):
         """
@@ -152,7 +36,6 @@ class MyTinkerApp:
         threshold_value = self.threshold_entry.get()
         strategy_value = self.strategy_var.get()
         
-        # Get the state of the checkbox and update the variable
         self.var.delete_files = self.delete_checkbox_var.get()
         
         if not input_directory:
@@ -169,31 +52,25 @@ class MyTinkerApp:
             self.var.threshold = int(threshold_value) if threshold_value else 10
             self.var.strategy = strategy_value
             
-            # Step 1: Find the duplicates using the new function
-            # The function now returns a new list, which we capture here
             logger.info("\n***************")
             logger.info("Starting Script")
             logger.info("***************\n")
 
             duplicate_groups = find_and_group_duplicates(self.var)
-            # We now assign the returned list to our variable object
             self.var.duplicate_groups = duplicate_groups
 
             if not duplicate_groups:
                 self.status_label.config(text="No duplicates or an error occurred.")
                 return
 
-            # Count the number of files to be deleted
             total_files_to_delete = sum(len(group) - 1 for group in duplicate_groups)
             
             if total_files_to_delete > 0:
                 if self.var.delete_files:
-                    # If the checkbox is checked, proceed with deletion
                     logger.info("Deletion checkbox is checked. Proceeding with deletion...")
                     delete_duplicates(self.var, deletion_strategy=self.var.strategy)
                     self.status_label.config(text="Analysis finished. Duplicates deleted.")
                 else:
-                    # If the checkbox is not checked, just report the findings
                     self.status_label.config(text=f"Analysis finished. Found {total_files_to_delete} duplicates. Deletion not requested.")
             else:
                 self.status_label.config(text="Analysis finished. No duplicates found.")
@@ -214,3 +91,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
