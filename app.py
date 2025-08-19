@@ -98,7 +98,7 @@ class MyTinkerApp:
         self.status_label.pack(pady=10)
         
         # Step 2: Add a Text widget for displaying logs
-        self.log_text = tk.Text(root, height=15, width=70)
+        self.log_text = tk.Text(root, width=70)
         self.log_text.pack(pady=10)
 
         # Add a scrollbar to the text widget
