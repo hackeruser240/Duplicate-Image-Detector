@@ -1,9 +1,7 @@
-# app.py
-
 from tkinter import filedialog, messagebox
-from scripts.variables import Variables
-from main import find_and_group_duplicates
-from scripts.functions import delete_duplicates
+from cli.variables import Variables
+from cli import find_and_group_duplicates
+from cli.functions import delete_duplicates
 
 import logging
 import os
