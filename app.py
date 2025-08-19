@@ -95,16 +95,25 @@ class MyTinkerApp:
         self.analyze_button.pack(pady=10)
         
         self.status_label = tk.Label(root, text="")
-        self.status_label.pack(pady=10)
+        self.status_label.pack(pady=5)
         
-        # Step 2: Add a Text widget for displaying logs
-        self.log_text = tk.Text(root, width=70)
-        self.log_text.pack(pady=10)
+        # --- NEW FRAME FOR LOGS AND BUTTON ---
+        log_frame = tk.Frame(root)
+        log_frame.pack(pady=10)
+        
+        # Add a Text widget for displaying logs inside the frame
+        self.log_text = tk.Text(log_frame, width=70)
+        self.log_text.pack(side=tk.LEFT, fill=tk.Y, expand=True)
 
-        # Add a scrollbar to the text widget
-        scrollbar = tk.Scrollbar(root, command=self.log_text.yview)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y, padx=5)
+        # Add a scrollbar to the text widget inside the frame
+        scrollbar = tk.Scrollbar(log_frame, command=self.log_text.yview)
+        scrollbar.pack(side=tk.LEFT, fill=tk.Y)
         self.log_text.config(yscrollcommand=scrollbar.set)
+        
+        # Add the "Clear Log" button next to the log display
+        self.clear_button = tk.Button(root, text="Clear Log", command=self.clear_log)
+        self.clear_button.pack(side=tk.RIGHT, padx=5)
+        # --- END NEW FRAME FOR LOGS AND BUTTON ---
 
         # Step 3: Configure the root logger directly inside the app
         root_logger = logging.getLogger()
@@ -138,10 +147,19 @@ class MyTinkerApp:
             self.directory_entry.insert(0, directory)
             self.status_label.config(text=f"Selected: {directory}")
 
+    def clear_log(self):
+        """
+        Clears all text from the log display widget.
+        """
+        self.log_text.config(state=tk.NORMAL)
+        self.log_text.delete('1.0', tk.END)
+        self.log_text.config(state=tk.DISABLED)
+
     def analyze_and_run(self):
         """
         This function orchestrates the analysis and deletion process for the GUI.
         """
+        total_files_to_delete = 0
         input_directory = self.directory_entry.get()
         threshold_value = self.threshold_entry.get()
         strategy_value = self.strategy_var.get()
@@ -164,7 +182,10 @@ class MyTinkerApp:
             self.var.strategy = strategy_value
             
             # Step 1: Find the duplicates using the new function
+            # The function now returns a new list, which we capture here
             duplicate_groups = find_and_group_duplicates(self.var)
+            # We now assign the returned list to our variable object
+            self.var.duplicate_groups = duplicate_groups
 
             if not duplicate_groups:
                 self.status_label.config(text="No duplicates or an error occurred.")
