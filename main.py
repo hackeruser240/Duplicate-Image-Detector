@@ -16,54 +16,59 @@ def find_and_group_duplicates(var):
     # Verify that the provided path is a valid directory
     if not os.path.isdir(var.target_directory):
         logger.error(f"Error: The provided path '{var.target_directory}' is not a valid directory.")
-        return None
+        return []
 
     # Step 1: Get all image hashes
     try:
+        logger.info("\n***************")
+        logger.info("Starting Script")
+        logger.info("***************\n")
         logger.info(f"Scanning '{var.target_directory}' with threshold {var.threshold} and strategy '{var.strategy}'...")
         hashes_map = get_image_hashes(var)
     except Exception as e:
         logger.error(f"An unexpected error occurred during hashing: {e}")
-        return None
+        return []
 
-    # Step 2: Find duplicate groups
+    # Step 2: Find duplicate groups using the corrected function
     try:
-        var.duplicate_groups = find_duplicates(hashes_map, threshold=var.threshold)
-        logger.info(f"Successfully found {len(var.duplicate_groups)} groups of duplicates.")
-        return var.duplicate_groups
+        duplicate_groups = find_duplicates(hashes_map, threshold=var.threshold)
+        logger.info(f"Successfully found {len(duplicate_groups)} groups of duplicates.")
     except Exception as e:
         logger.error(f"An unexpected error occurred while finding duplicates: {e}")
-        return None
+        return []
+
+    return duplicate_groups
 
 def main(var):
     """
-    The main function for the command-line interface.
-    This function orchestrates the workflow, including user prompts for deletion.
-    """   
-    logger = logging.getLogger(__name__)
+    The main function to run the duplicate image detection and deletion tool.
+    This is for command-line execution and is not used by the GUI.
+    """
+    if not os.path.isdir(var.target_directory):
+        logger.error(f"Error: The provided path '{var.target_directory}' is not a valid directory.")
+        sys.exit(1)
+
+    try:
+        logger.info(f"Scanning '{var.target_directory}' with threshold {var.threshold} and strategy '{var.strategy}'...")
+        hashes_map = get_image_hashes(var)
+    except Exception as e:
+        logger.info(f"An unexpected error occurred during hashing: {e}")
+        sys.exit(1)
     
-    # Call the function to find duplicates
-    duplicate_groups = find_and_group_duplicates(var)
-    if duplicate_groups is None:
+    try:
+        var.duplicate_groups = find_duplicates(hashes_map, threshold=var.threshold)
+        logger.info(f"Successfully found duplicate groups")
+    except Exception as e:
+        logger.error(f"An unexpected error occurred while finding duplicates: {e}")
+        sys.exit(1)
+
+    try:
+        delete_duplicates(var, deletion_strategy=var.strategy)
+    except Exception as e:
+        logger.error(f"An unexpected error occurred during deletion: {e}")
         sys.exit(1)
         
-    # Step 3: Delete duplicates after user confirmation (for CLI)
-    total_files_to_delete = sum(len(group) - 1 for group in duplicate_groups)
-    if total_files_to_delete > 0:
-        confirm = input(f"Are you sure you want to delete {total_files_to_delete} files? (yes/no): ")
-        if confirm.lower() == 'yes':
-            try:
-                delete_duplicates(var, deletion_strategy=var.strategy)
-            except Exception as e:
-                logger.error(f"An unexpected error occurred during deletion: {e}")
-                sys.exit(1)
-            logger.info("Deletion complete.")
-        else:
-            logger.info("Deletion cancelled.")
-    else:
-        logger.info("No duplicates found to delete.")
-
-    logger.info("\nProcess finished.")
+    logger.info("Process finished.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -91,8 +96,6 @@ if __name__ == "__main__":
         help="The strategy to use for deletion: 'keep_first' or 'keep_smallest'. (default: 'keep_first')"
     )
     
-    
-
     parser.add_argument(
         "--delete_files",
         type=str,
@@ -106,13 +109,36 @@ if __name__ == "__main__":
         logger = logging.getLogger(__name__)
         logger.info(f"Error parsing arguments: {e}", file=sys.stderr)
         sys.exit(1)
-
-    loggerSetup()
-    
+        
+    logger = loggerSetup()
     var = Variables()
     var.target_directory = args.directory
     var.threshold = args.threshold
     var.strategy = args.strategy
-    var.delete_files=args.delete_files
+    var.delete_files = True if args.delete_files.lower() == 'yes' else False
 
-    main(var)
+    if not os.path.isdir(var.target_directory):
+        logger.error(f"Error: The provided path '{var.target_directory}' is not a valid directory.")
+        sys.exit(1)
+
+    try:
+        logger.info(f"Scanning '{var.target_directory}' with threshold {var.threshold} and strategy '{var.strategy}'...")
+        hashes_map = get_image_hashes(var)
+    except Exception as e:
+        logger.info(f"An unexpected error occurred during hashing: {e}")
+        sys.exit(1)
+    
+    try:
+        var.duplicate_groups = find_duplicates(hashes_map, threshold=var.threshold)
+        logger.info(f"Successfully found duplicate groups")
+    except Exception as e:
+        logger.error(f"An unexpected error occurred while finding duplicates: {e}")
+        sys.exit(1)
+
+    try:
+        delete_duplicates(var, deletion_strategy=var.strategy)
+    except Exception as e:
+        logger.error(f"An unexpected error occurred during deletion: {e}")
+        sys.exit(1)
+        
+    logger.info("Process finished.")
