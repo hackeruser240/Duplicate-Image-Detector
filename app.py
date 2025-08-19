@@ -1,23 +1,14 @@
-# Import the Tkinter module
-import tkinter as tk
-# Import the filedialog and messagebox modules
 from tkinter import filedialog, messagebox
-# Import the traceback module for detailed error handling
-import traceback
-
-# Import other necessary project modules
 from scripts.variables import Variables
-# We no longer need to import loggerSetup as we handle logging here
-# from scripts.logger import loggerSetup 
-# Import the new function from main.py for finding duplicates
 from main import find_and_group_duplicates
-# Import the delete_duplicates function directly
 from scripts.functions import delete_duplicates
 
 import logging
 import os
+import tkinter as tk
+import traceback
 
-# Step 1: Create a custom handler to redirect logs to the Text widget
+
 class TkinterTextHandler(logging.Handler):
     """
     A custom logging handler that redirects log messages to a Tkinter Text widget.
@@ -47,9 +38,8 @@ class MyTinkerApp:
         self.root.geometry("600x700")
         self.root.resizable(True, True)
         
-        # Initialize the Variables object here to make it accessible
+        
         self.var = Variables()
-        # Initialize a Tkinter BooleanVar and link it to the variable class
         self.delete_checkbox_var = tk.BooleanVar()
         self.var.threshold=10
 
@@ -59,11 +49,9 @@ class MyTinkerApp:
     
         # Directory Input
         self.label_dir = tk.Label(input_frame, text="Browse or Enter directory.")
-        self.label_dir.grid(row=0, column=0, columnspan=2, pady=5)
-        
+        self.label_dir.grid(row=0, column=0, columnspan=2, pady=5)        
         self.directory_entry = tk.Entry(input_frame, width=50)
         self.directory_entry.grid(row=1, column=0, columnspan=2, pady=5)
-
         self.button_browse = tk.Button(input_frame, text="Browse Directory", command=self.browse_directory)
         self.button_browse.grid(row=2, column=0, columnspan=2, pady=5)
 
@@ -79,12 +67,10 @@ class MyTinkerApp:
 
         # Deletion Strategy Dropdown
         self.strategy_label = tk.Label(input_frame, text="Deletion Strategy")
-        self.strategy_label.grid(row=5, column=0, padx=5, pady=5, sticky="e")
-        
+        self.strategy_label.grid(row=5, column=0, padx=5, pady=5, sticky="e")        
         self.strategy_var = tk.StringVar(root)
         self.strategy_options = ['keep_first', 'keep_smallest']
         self.strategy_var.set(self.strategy_options[0])
-
         self.strategy_menu = tk.OptionMenu(input_frame, self.strategy_var, *self.strategy_options)
         self.strategy_menu.grid(row=5, column=1, padx=5, pady=5, sticky="ew")
         
@@ -94,8 +80,7 @@ class MyTinkerApp:
 
         # Analyze Button
         self.analyze_button = tk.Button(root, text="Analyze and Run", command=self.analyze_and_run)
-        self.analyze_button.pack(pady=10)
-        
+        self.analyze_button.pack(pady=10)        
         self.status_label = tk.Label(root, text="")
         self.status_label.pack(pady=5)
         
@@ -106,17 +91,14 @@ class MyTinkerApp:
         # Add a Text widget for displaying logs inside the frame
         self.log_text = tk.Text(log_frame, width=70)
         self.log_text.pack(side=tk.LEFT, fill=tk.Y, expand=True)
-
         # Add a scrollbar to the text widget inside the frame
         scrollbar = tk.Scrollbar(log_frame, command=self.log_text.yview)
         scrollbar.pack(side=tk.LEFT, fill=tk.Y)
-        self.log_text.config(yscrollcommand=scrollbar.set)
-        
+        self.log_text.config(yscrollcommand=scrollbar.set)        
         # Add the "Clear Log" button next to the log display
         self.clear_button = tk.Button(root, text="Clear Log", command=self.clear_log)
         self.clear_button.pack(side=tk.RIGHT, padx=5)
-        # --- END NEW FRAME FOR LOGS AND BUTTON ---
-
+        
         # Step 3: Configure the root logger directly inside the app
         root_logger = logging.getLogger()
         root_logger.setLevel(logging.INFO)
