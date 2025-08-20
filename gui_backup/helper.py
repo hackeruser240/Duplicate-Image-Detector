@@ -77,7 +77,7 @@ def setup_gui(app):
     # Analyze Button
     # Create a frame to hold both buttons
     button_frame = tk.Frame(app.root)
-    button_frame.pack(pady=2)
+    button_frame.pack(pady=0)
 
     # Pack the "Analyze and Run" button into the new frame
     app.analyze_button = tk.Button(button_frame, text="Analyze and Run", command=app.analyze_and_run)
@@ -92,18 +92,23 @@ def setup_gui(app):
 
     # --- FRAME FOR LOGS ---
     log_frame = tk.Frame(app.root)
-    log_frame.pack(pady=(5, 10), fill=tk.BOTH, expand=True)
+    log_frame.pack(pady=(0, 10), fill=tk.BOTH, expand=True)
 
     # Add a Text widget for displaying logs inside the log frame
     app.log_text = tk.Text(log_frame)
-    # Pack the log text on the left side of the frame
-    app.log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    # Place the text widget in column 0 of the grid and have it fill the space
+    app.log_text.grid(row=0, column=0, sticky="nsew")
 
     # Add a scrollbar to the text widget inside the log frame
     scrollbar = tk.Scrollbar(log_frame, command=app.log_text.yview)
-    # Pack the scrollbar on the RIGHT side of the frame
-    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    # Place the scrollbar in column 1
+    scrollbar.grid(row=0, column=1, sticky="ns")
+
     app.log_text.config(yscrollcommand=scrollbar.set)
+
+    # Configure the log_frame's columns to expand when the window is resized
+    log_frame.grid_columnconfigure(0, weight=1)
+    log_frame.grid_rowconfigure(0, weight=1)
 
 def setup_logging(app):
     """
