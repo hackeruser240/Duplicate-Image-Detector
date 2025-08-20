@@ -84,9 +84,10 @@ def setup_gui(app):
     app.analyze_button.pack(side=tk.LEFT, padx=5)
 
     # Pack the "Clear Log" button next to it
-    app.clear_button = tk.Button(button_frame, text="Clear Log", command=lambda: clear_log(app.log_text))
+    # The command is updated to clear both the log text and the status label
+    app.clear_button = tk.Button(button_frame, text="Clear Log", command=lambda: [clear_log(app.log_text), app.status_label.config(text="All Logs Cleared")])
     app.clear_button.pack(side=tk.LEFT, padx=5)
-         
+        
     app.status_label = tk.Label(app.root, text="")
     app.status_label.pack(pady=5)
 
