@@ -79,22 +79,31 @@ def setup_gui(app):
     app.status_label = tk.Label(app.root, text="")
     app.status_label.pack(pady=5)
     
-    # --- NEW FRAME FOR LOGS AND BUTTON ---
+    # --- FRAME FOR THE BUTTON ---
+    # This frame will contain just the "Clear Log" button.
+    # By packing it first, it will appear at the top.
+    button_frame = tk.Frame(app.root)
+    button_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=(10, 0))
+
+    # Add the "Clear Log" button inside the button frame.
+    # Using side=tk.RIGHT will push it to the far right of its parent frame.
+    app.clear_button = tk.Button(button_frame, text="Clear Log", command=lambda: clear_log(app.log_text))
+    app.clear_button.pack(side=tk.RIGHT)
+
+    # --- FRAME FOR LOGS ---
     log_frame = tk.Frame(app.root)
-    log_frame.pack(pady=10)
-    
-    # Add a Text widget for displaying logs inside the frame
-    app.log_text = tk.Text(log_frame, width=70)
-    app.log_text.pack(side=tk.LEFT, fill=tk.Y, expand=True)
-    
-    # Add a scrollbar to the text widget inside the frame
+    # Tell the log_frame to expand and fill available space in both directions
+    log_frame.pack(pady=(5, 10), fill=tk.BOTH, expand=True)
+
+    # Add a Text widget for displaying logs inside the log frame
+    app.log_text = tk.Text(log_frame)
+    # Tell the log_text widget to expand and fill all available space within its parent (log_frame)
+    app.log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    # Add a scrollbar to the text widget inside the log frame
     scrollbar = tk.Scrollbar(log_frame, command=app.log_text.yview)
     scrollbar.pack(side=tk.LEFT, fill=tk.Y)
-    app.log_text.config(yscrollcommand=scrollbar.set)        
-    
-    # Add the "Clear Log" button next to the log display
-    app.clear_button = tk.Button(app.root, text="Clear Log", command=lambda: clear_log(app.log_text))
-    app.clear_button.pack(side=tk.RIGHT, padx=5)
+    app.log_text.config(yscrollcommand=scrollbar.set)
 
 def setup_logging(app):
     """

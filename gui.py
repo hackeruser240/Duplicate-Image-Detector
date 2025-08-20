@@ -13,7 +13,7 @@ class MyTinkerApp:
         self.root = root
         self.root.title("Image Duplication Detector")
         self.root.geometry("600x700")
-        self.root.resizable(True, True)
+        #self.root.resizable(True, True)
         
         # 1. Initialize variables
         self.var = Variables()
