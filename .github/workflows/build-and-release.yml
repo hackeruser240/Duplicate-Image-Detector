@@ -31,4 +31,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Image-Duplication-Detector-Windows
-          path: dist/"Image Duplication Detector".exe
+          path: dist/Image Duplication Detector.exe
