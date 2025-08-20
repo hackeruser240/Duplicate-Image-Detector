@@ -4,3 +4,6 @@ py-env/
 scripts/__pycache__/
 __pycache__/
 logs/
+*.spec
+build/
+dist/

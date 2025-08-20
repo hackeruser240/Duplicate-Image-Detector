@@ -1,13 +1,12 @@
 from tkinter import filedialog, messagebox
-from cli.variables import Variables
-from cli import find_and_group_duplicates
-from cli.functions import delete_duplicates
+from cli_backup.variables import Variables
+from cli_backup.functions import delete_duplicates
+from gui_backup.helper import setup_gui, setup_logging, browse_directory, clear_log
 
+import _cli
 import logging
-import os
 import tkinter as tk
 import traceback
-from gui.helper import setup_gui, setup_logging, browse_directory, clear_log
 
 class MyTinkerApp:
     def __init__(self, root):
@@ -54,7 +53,7 @@ class MyTinkerApp:
             logger.info("Starting Script")
             logger.info("***************\n")
 
-            duplicate_groups = find_and_group_duplicates(self.var)
+            duplicate_groups = _cli.find_and_group_duplicates(self.var)
             self.var.duplicate_groups = duplicate_groups
 
             if not duplicate_groups:

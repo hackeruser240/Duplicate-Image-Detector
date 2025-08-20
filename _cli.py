@@ -2,9 +2,9 @@ import sys
 import argparse
 import os
 import logging
-from cli.functions import get_image_hashes, find_duplicates, delete_duplicates
-from cli.variables import Variables
-from cli.logger import loggerSetup
+from cli_backup.functions import get_image_hashes, find_duplicates, delete_duplicates
+from cli_backup.variables import Variables
+from cli_backup.logger import loggerSetup
 
 def find_and_group_duplicates(var):
     """
