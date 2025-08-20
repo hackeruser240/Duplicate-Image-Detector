@@ -51,7 +51,7 @@ def setup_gui(app):
     app.button_browse.grid(row=2, column=0, columnspan=2, pady=5)
 
     # Separator for visual clarity
-    tk.Frame(input_frame, height=1, bg="gray").grid(row=3, column=0, columnspan=2, sticky="ew", pady=10)
+    #tk.Frame(input_frame, height=1, bg="gray").grid(row=3, column=0, columnspan=2, sticky="ew", pady=10)
 
     # Threshold Input
     app.threshold_label = tk.Label(input_frame, text="Enter Threshold:")
@@ -96,14 +96,11 @@ def setup_gui(app):
 
     # Add a Text widget for displaying logs inside the log frame
     app.log_text = tk.Text(log_frame)
-    # Place the text widget in column 0 of the grid and have it fill the space
     app.log_text.grid(row=0, column=0, sticky="nsew")
 
     # Add a scrollbar to the text widget inside the log frame
     scrollbar = tk.Scrollbar(log_frame, command=app.log_text.yview)
-    # Place the scrollbar in column 1
     scrollbar.grid(row=0, column=1, sticky="ns")
-
     app.log_text.config(yscrollcommand=scrollbar.set)
 
     # Configure the log_frame's columns to expand when the window is resized
