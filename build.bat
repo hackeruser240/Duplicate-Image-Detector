@@ -13,7 +13,7 @@ echo ===========================================
 
 rem Run PyInstaller command
 
-pyinstaller --clean --onefile --noconsole --name="Image Duplication Detector" --hidden-import=imagehash -p . gui.py
+pyinstaller --clean --onefile --noconsole --name="Image Duplication Detector" --hidden-import=imagehash -p ./src src/gui.py
 
 echo ===========================================
 echo Build process finished
