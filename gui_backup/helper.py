@@ -54,55 +54,55 @@ def setup_gui(app):
     tk.Frame(input_frame, height=1, bg="gray").grid(row=3, column=0, columnspan=2, sticky="ew", pady=10)
 
     # Threshold Input
-    app.threshold_label = tk.Label(input_frame, text="Enter Threshold")
+    app.threshold_label = tk.Label(input_frame, text="Enter Threshold:")
     app.threshold_label.grid(row=4, column=0, padx=5, pady=5, sticky="e")
-    app.threshold_entry = tk.Entry(input_frame, width=17)
+    app.threshold_entry = tk.Entry(input_frame, width=10)
     app.threshold_entry.insert(0, str(app.var.threshold))
     app.threshold_entry.grid(row=4, column=1, padx=5, pady=5)
 
     # Deletion Strategy Dropdown
-    app.strategy_label = tk.Label(input_frame, text="Deletion Strategy")
+    app.strategy_label = tk.Label(input_frame, text="Deletion Strategy:")
     app.strategy_label.grid(row=5, column=0, padx=5, pady=5, sticky="e")        
     app.strategy_var = tk.StringVar(app.root)
     app.strategy_options = ['keep_first', 'keep_smallest']
     app.strategy_var.set(app.strategy_options[0])
     app.strategy_menu = tk.OptionMenu(input_frame, app.strategy_var, *app.strategy_options)
+    app.strategy_menu.config(width=1)
     app.strategy_menu.grid(row=5, column=1, padx=5, pady=5, sticky="ew")
     
     # New Checkbutton for deletion, linked to the BooleanVar
     app.delete_check = tk.Checkbutton(input_frame, text="Delete duplicates automatically", variable=app.delete_checkbox_var)
-    app.delete_check.grid(row=6, column=0, columnspan=2, pady=10)
+    app.delete_check.grid(row=6, column=0, columnspan=2)
 
     # Analyze Button
-    app.analyze_button = tk.Button(app.root, text="Analyze and Run", command=app.analyze_and_run)
-    app.analyze_button.pack(pady=10)        
+    # Create a frame to hold both buttons
+    button_frame = tk.Frame(app.root)
+    button_frame.pack(pady=2)
+
+    # Pack the "Analyze and Run" button into the new frame
+    app.analyze_button = tk.Button(button_frame, text="Analyze and Run", command=app.analyze_and_run)
+    app.analyze_button.pack(side=tk.LEFT, padx=5)
+
+    # Pack the "Clear Log" button next to it
+    app.clear_button = tk.Button(button_frame, text="Clear Log", command=lambda: clear_log(app.log_text))
+    app.clear_button.pack(side=tk.LEFT, padx=5)
+         
     app.status_label = tk.Label(app.root, text="")
     app.status_label.pack(pady=5)
-    
-    # --- FRAME FOR THE BUTTON ---
-    # This frame will contain just the "Clear Log" button.
-    # By packing it first, it will appear at the top.
-    button_frame = tk.Frame(app.root)
-    button_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=(10, 0))
-
-    # Add the "Clear Log" button inside the button frame.
-    # Using side=tk.RIGHT will push it to the far right of its parent frame.
-    app.clear_button = tk.Button(button_frame, text="Clear Log", command=lambda: clear_log(app.log_text))
-    app.clear_button.pack(side=tk.RIGHT)
 
     # --- FRAME FOR LOGS ---
     log_frame = tk.Frame(app.root)
-    # Tell the log_frame to expand and fill available space in both directions
     log_frame.pack(pady=(5, 10), fill=tk.BOTH, expand=True)
 
     # Add a Text widget for displaying logs inside the log frame
     app.log_text = tk.Text(log_frame)
-    # Tell the log_text widget to expand and fill all available space within its parent (log_frame)
+    # Pack the log text on the left side of the frame
     app.log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
     # Add a scrollbar to the text widget inside the log frame
     scrollbar = tk.Scrollbar(log_frame, command=app.log_text.yview)
-    scrollbar.pack(side=tk.LEFT, fill=tk.Y)
+    # Pack the scrollbar on the RIGHT side of the frame
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
     app.log_text.config(yscrollcommand=scrollbar.set)
 
 def setup_logging(app):
