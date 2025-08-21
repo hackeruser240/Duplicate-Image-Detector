@@ -3,19 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Explainer: Duplicate Image Finder</title>
+    <title>Image Duplication Detector</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Warm Neutrals (Slate, Zinc, Stone) -->
-    <!-- Application Structure Plan: A top-down narrative SPA. It starts with a high-level intro, moves to an interactive flowchart of the core process, then dives into key concepts with toggles, provides a tabbed code explorer, and ends with practical usage instructions. This structure was chosen to guide the user from a broad understanding to specific details, making complex information digestible. The interactive flowchart is the centerpiece, designed to make the abstract process tangible and engaging. -->
-    <!-- Visualization & Content Choices: 
-    - Report Info: Core project workflow -> Goal: Organize/Inform -> Viz: Interactive HTML/CSS flowchart -> Interaction: Click steps to reveal code/explanations -> Justification: More engaging and clearer than static text, directly linking process steps to the source code.
-    - Report Info: Key concepts (hashing, distance) -> Goal: Inform -> Viz: Accordion/toggle component -> Interaction: Click to expand -> Justification: Hides complexity by default, allowing users to self-direct their learning.
-    - Report Info: Source code files -> Goal: Organize -> Viz: Tabbed interface -> Interaction: Click to switch files -> Justification: Standard, clean UI for presenting multiple code blocks without excessive scrolling.
-    - Library/Method: All interactions are handled with vanilla JavaScript. All visuals are built with HTML and Tailwind CSS.
-    CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -28,32 +22,17 @@
         .nav-link:hover {
             color: #0ea5e9; /* sky-500 */
         }
-        .flow-step {
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
-        }
-        .flow-step:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
-        }
-        .flow-step.active {
-            background-color: #0ea5e9; /* sky-500 */
-            color: white;
-            border-color: #0284c7; /* sky-600 */
-        }
-        .flow-arrow {
-            color: #94a3b8; /* slate-400 */
-        }
-        .code-tab.active {
-            border-color: #0ea5e9; /* sky-500 */
-            color: #0ea5e9; /* sky-500 */
-            background-color: #f0f9ff; /* sky-50 */
-        }
         .concept-toggle summary::-webkit-details-marker {
             display: none;
         }
         .concept-toggle summary {
             list-style: none;
+            cursor: pointer;
+        }
+        .code-tab.active {
+            border-color: #0ea5e9; /* sky-500 */
+            color: #0ea5e9; /* sky-500 */
+            background-color: #f0f9ff; /* sky-50 */
         }
     </style>
 </head>
@@ -62,150 +41,725 @@
     <!-- Header & Navigation -->
     <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 border-b border-slate-200">
         <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center py-4">
-                <h1 class="text-xl md:text-2xl font-bold text-slate-800">Duplicate Image Finder</h1>
-                <nav class="hidden md:flex items-center space-x-6 text-slate-600">
+            <div class="flex flex-col md:flex-row justify-between items-center py-4">
+                <h1 class="text-2xl md:text-3xl font-bold text-slate-800 mb-2 md:mb-0">Image Duplication Detector</h1>
+                <nav class="flex flex-wrap justify-center items-center space-x-2 sm:space-x-6 text-slate-600">
                     <a href="#how-it-works" class="nav-link font-medium">How It Works</a>
                     <a href="#concepts" class="nav-link font-medium">Key Concepts</a>
-                    <a href="#code-explorer" class="nav-link font-medium">Code Explorer</a>
-                    <a href="#how-to-use" class="nav-link font-medium">How to Use</a>
+                    <a href="#run" class="nav-link font-medium">How to Run</a>
+                    <a href="#code" class="nav-link font-medium">Source Code</a>
+                    <a href="#directory" class="nav-link font-medium">Directory Structure</a>
                 </nav>
-                <button id="mobile-menu-button" class="md:hidden text-slate-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                </button>
             </div>
-        </div>
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-200">
-            <a href="#how-it-works" class="block py-2 px-4 text-slate-600 hover:bg-slate-100">How It Works</a>
-            <a href="#concepts" class="block py-2 px-4 text-slate-600 hover:bg-slate-100">Key Concepts</a>
-            <a href="#code-explorer" class="block py-2 px-4 text-slate-600 hover:bg-slate-100">Code Explorer</a>
-            <a href="#how-to-use" class="block py-2 px-4 text-slate-600 hover:bg-slate-100">How to Use</a>
         </div>
     </header>
 
-    <main class="container mx-auto px-4 py-8 md:py-12">
+    <main class="container mx-auto px-4 py-8 md:py-16 space-y-16">
 
         <!-- Introduction Section -->
-        <section id="intro" class="text-center mb-16 md:mb-24">
-            <h2 class="text-3xl md:text-5xl font-bold text-slate-900 mb-4">Find and Remove Duplicate Images, Intelligently.</h2>
-            <p class="max-w-3xl mx-auto text-lg md:text-xl text-slate-600">
-                This application is a command-line tool that scans your photo library to find and delete duplicate and near-duplicate images. It doesn't just look at filenames; it analyzes the actual content of each image to find matches, even if they've been resized, re-compressed, or saved in a different format.
+        <section id="intro" class="text-center max-w-4xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Find & Delete Duplicate Images with Ease</h2>
+            <p class="text-lg text-slate-600 leading-relaxed">
+                Welcome to the Image Duplication Detector project. This tool helps you clean up your photo library by finding and removing exact or similar images. It's built with Python, using a mix of a command-line interface and a graphical user interface for maximum flexibility.
             </p>
         </section>
 
         <!-- How It Works Section -->
-        <section id="how-it-works" class="mb-16 md:mb-24">
-            <div class="text-center mb-12">
-                <h3 class="text-3xl md:text-4xl font-bold text-slate-900">The Workflow: An Interactive Journey</h3>
-                <p class="max-w-2xl mx-auto mt-3 text-lg text-slate-600">
-                    The tool follows a clear, step-by-step process to clean up your image folders. Click on any step below to see a brief explanation and the relevant code snippet that powers it. This interactive diagram shows you exactly how the application works from start to finish.
-                </p>
-            </div>
-
-            <!-- Interactive Flowchart -->
-            <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 mb-8">
-                <div id="step-1" class="flow-step bg-white border-2 border-slate-200 rounded-lg p-4 w-full md:w-48 text-center shadow-sm">
-                    <div class="font-bold text-lg">1. User Input</div>
-                    <div class="text-sm text-slate-500">Parse CLI Arguments</div>
+        <section id="how-it-works" class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 text-center">How the Project Works</h2>
+            <div class="grid md:grid-cols-2 gap-8 items-center bg-white p-6 md:p-12 rounded-2xl shadow-xl border border-slate-200">
+                <div class="space-y-6">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold mr-4">1</div>
+                        <p class="text-lg text-slate-700">The script recursively scans a target directory and finds all supported image files (JPG, PNG, GIF, BMP).</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold mr-4">2</div>
+                        <p class="text-lg text-slate-700">For each image, it calculates a unique **perceptual hash** that represents its visual content, ignoring minor changes like compression or size. This is done using the `imagehash` library.</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold mr-4">3</div>
+                        <p class="text-lg text-slate-700">The tool then compares the hashes of all images. If the **Hamming distance** between two hashes is below a user-defined threshold, the images are considered duplicates.</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold mr-4">4</div>
+                        <p class="text-lg text-slate-700">Finally, based on the user's chosen strategy (`keep_first` or `keep_smallest`), the duplicate files are either marked for deletion (dry run) or permanently removed.</p>
+                    </div>
                 </div>
-                <div class="flow-arrow text-2xl md:text-4xl transform md:-rotate-90">↓</div>
-                <div id="step-2" class="flow-step bg-white border-2 border-slate-200 rounded-lg p-4 w-full md:w-48 text-center shadow-sm">
-                    <div class="font-bold text-lg">2. Scan & Hash</div>
-                    <div class="text-sm text-slate-500">Generate Image Hashes</div>
+                <div class="relative w-full h-full min-h-[300px] flex items-center justify-center">
+                    <!-- SVG Flowchart -->
+                    <svg viewBox="0 0 400 300" class="w-full h-full text-slate-400">
+                        <defs>
+                            <marker id="arrowhead" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+                            </marker>
+                        </defs>
+                        <g class="transition-all duration-300 transform scale-90 md:scale-100">
+                            <!-- Step 1: Scan -->
+                            <rect x="100" y="10" width="200" height="60" rx="10" class="fill-sky-100 stroke-sky-400 stroke-2"/>
+                            <text x="200" y="45" text-anchor="middle" class="text-sm font-semibold fill-slate-800">Scan Directory & Find Images</text>
+                            <line x1="200" y1="70" x2="200" y2="110" stroke="currentColor" stroke-width="2" marker-end="url(#arrowhead)" class="flow-arrow"/>
+                            
+                            <!-- Step 2: Hash -->
+                            <rect x="100" y="120" width="200" height="60" rx="10" class="fill-sky-100 stroke-sky-400 stroke-2"/>
+                            <text x="200" y="155" text-anchor="middle" class="text-sm font-semibold fill-slate-800">Calculate Perceptual Hashes</text>
+                            <line x1="200" y1="180" x2="200" y2="220" stroke="currentColor" stroke-width="2" marker-end="url(#arrowhead)" class="flow-arrow"/>
+                            
+                            <!-- Step 3: Compare -->
+                            <rect x="100" y="230" width="200" height="60" rx="10" class="fill-sky-100 stroke-sky-400 stroke-2"/>
+                            <text x="200" y="265" text-anchor="middle" class="text-sm font-semibold fill-slate-800">Compare Hashes</text>
+                        </g>
+                    </svg>
                 </div>
-                <div class="flow-arrow text-2xl md:text-4xl transform md:-rotate-90">↓</div>
-                <div id="step-3" class="flow-step bg-white border-2 border-slate-200 rounded-lg p-4 w-full md:w-48 text-center shadow-sm">
-                    <div class="font-bold text-lg">3. Find Duplicates</div>
-                    <div class="text-sm text-slate-500">Compare Hashes</div>
-                </div>
-                <div class="flow-arrow text-2xl md:text-4xl transform md:-rotate-90">↓</div>
-                <div id="step-4" class="flow-step bg-white border-2 border-slate-200 rounded-lg p-4 w-full md:w-48 text-center shadow-sm">
-                    <div class="font-bold text-lg">4. Delete Files</div>
-                    <div class="text-sm text-slate-500">Confirm & Remove</div>
-                </div>
-            </div>
-
-            <!-- Explanation Box -->
-            <div id="explanation-box" class="mt-8 bg-white rounded-lg shadow-lg p-6 min-h-[200px] transition-opacity duration-300">
-                <!-- Content will be injected here by JS -->
             </div>
         </section>
 
         <!-- Key Concepts Section -->
-        <section id="concepts" class="mb-16 md:mb-24">
-            <div class="text-center mb-12">
-                <h3 class="text-3xl md:text-4xl font-bold text-slate-900">The Magic Behind the Scenes</h3>
-                <p class="max-w-2xl mx-auto mt-3 text-lg text-slate-600">
-                    The tool relies on a few core computer science concepts to analyze images. These ideas are what make the script "intelligent." Click on each concept to learn more about how it contributes to the process.
-                </p>
-            </div>
-            <div class="max-w-3xl mx-auto space-y-4">
-                <details class="concept-toggle group bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-                    <summary class="p-4 cursor-pointer flex justify-between items-center font-semibold text-slate-800 group-hover:bg-slate-50">
-                        Perceptual Hashing
-                        <span class="text-sky-500 transform transition-transform duration-200 group-open:rotate-180">▼</span>
+        <section id="concepts" class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 text-center">Key Concepts</h2>
+            <div class="space-y-6 bg-white p-6 md:p-12 rounded-2xl shadow-xl border border-slate-200">
+                <!-- Perceptual Hashing -->
+                <details class="concept-toggle p-4 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors duration-200">
+                    <summary class="flex justify-between items-center text-xl font-semibold text-slate-800">
+                        Perceptual Hashing <i class="fas fa-chevron-down text-sm"></i>
                     </summary>
-                    <div class="p-4 border-t border-slate-200 text-slate-600">
-                        Instead of a cryptographic hash (like for passwords), a perceptual hash is a "fingerprint" of an image's visual content. The process involves scaling the image to a small, fixed size, converting it to grayscale, and then analyzing its structure to produce a short hash string. Similar-looking images will have very similar hashes.
-                    </div>
+                    <p class="mt-4 text-slate-600 leading-relaxed">
+                        Unlike a cryptographic hash (like SHA-256) which changes drastically with a single-pixel change, a **perceptual hash** is designed to capture the "fingerprint" of an image's visual content. It generates a hash that is very similar for images that look similar to the human eye. This is what allows the tool to find not just exact duplicates, but also near-duplicates, like resized or slightly edited photos.
+                    </p>
                 </details>
-                <details class="concept-toggle group bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-                    <summary class="p-4 cursor-pointer flex justify-between items-center font-semibold text-slate-800 group-hover:bg-slate-50">
-                        Hamming Distance
-                        <span class="text-sky-500 transform transition-transform duration-200 group-open:rotate-180">▼</span>
+
+                <!-- Hamming Distance -->
+                <details class="concept-toggle p-4 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors duration-200">
+                    <summary class="flex justify-between items-center text-xl font-semibold text-slate-800">
+                        Hamming Distance <i class="fas fa-chevron-down text-sm"></i>
                     </summary>
-                    <div class="p-4 border-t border-slate-200 text-slate-600">
-                        This is a measure of how different two hashes (of the same length) are. It's calculated by counting the number of positions at which the corresponding characters are different. A Hamming distance of `0` means the hashes are identical. A small distance (e.g., 1-10) means the hashes, and therefore the images, are very similar. The `--threshold` argument in our script sets the maximum allowed Hamming distance for two images to be considered duplicates.
-                    </div>
+                    <p class="mt-4 text-slate-600 leading-relaxed">
+                        The **Hamming distance** is a metric used to compare two hashes. It counts the number of positions at which the corresponding symbols are different. In this project, it's used to measure how "different" two image hashes are. A low Hamming distance means the images are visually very similar, while a high distance means they are very different. The `threshold` setting controls the maximum acceptable distance for two images to be considered duplicates.
+                    </p>
                 </details>
-                 <details class="concept-toggle group bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-                    <summary class="p-4 cursor-pointer flex justify-between items-center font-semibold text-slate-800 group-hover:bg-slate-50">
-                        Deletion Strategies
-                        <span class="text-sky-500 transform transition-transform duration-200 group-open:rotate-180">▼</span>
+
+                <!-- Object-Oriented Programming (OOP) -->
+                <details class="concept-toggle p-4 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors duration-200">
+                    <summary class="flex justify-between items-center text-xl font-semibold text-slate-800">
+                        Object-Oriented Programming (OOP) <i class="fas fa-chevron-down text-sm"></i>
                     </summary>
-                    <div class="p-4 border-t border-slate-200 text-slate-600">
-                        When a group of duplicates is found, the script needs a rule to decide which one to keep.
-                        <ul class="list-disc list-inside mt-2 space-y-1">
-                            <li><strong class="font-semibold">keep_first:</strong> This strategy keeps the first image file it found in a duplicate group and deletes all others. It prioritizes files that don't have "copy" in their name.</li>
-                            <li><strong class="font-semibold">keep_smallest:</strong> This strategy calculates the file size of every image in the duplicate group, keeps the one with the smallest size (in bytes), and deletes the rest.</li>
-                        </ul>
-                    </div>
+                    <p class="mt-4 text-slate-600 leading-relaxed">
+                        The project is structured using OOP principles, which helps to organize the code and make it more maintainable. The `Variables` class, for example, encapsulates all the state of the application (like the target directory, threshold, etc.) into a single object. This keeps the data separate from the functions that operate on it, making the code cleaner and easier to manage.
+                    </p>
                 </details>
             </div>
         </section>
 
-        <!-- Code Explorer Section -->
-        <section id="code-explorer" class="mb-16 md:mb-24">
-            <div class="text-center mb-12">
-                <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Explore the Source Code</h3>
-                <p class="max-w-2xl mx-auto mt-3 text-lg text-slate-600">
-                    The project is split into logical files for better organization. The `main.py` file handles user input, while `functions.py` contains the core logic. `variables.py` holds the data. Click the tabs below to view the complete source code for each file.
-                </p>
-            </div>
-            <div class="max-w-4xl mx-auto bg-slate-800 rounded-lg shadow-2xl overflow-hidden">
-                <div class="flex border-b border-slate-700">
-                    <button class="code-tab p-3 font-mono text-sm text-slate-300 border-b-2 border-transparent" data-target="main-py">main.py</button>
-                    <button class="code-tab p-3 font-mono text-sm text-slate-300 border-b-2 border-transparent" data-target="functions-py">scripts/functions.py</button>
-                    <button class="code-tab p-3 font-mono text-sm text-slate-300 border-b-2 border-transparent" data-target="variables-py">scripts/variables.py</button>
-                    <button class="code-tab p-3 font-mono text-sm text-slate-300 border-b-2 border-transparent" data-target="requirements-txt">requirements.txt</button>
+        <!-- How to Run Section -->
+        <section id="run" class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 text-center">How to Run the Script</h2>
+            <div class="space-y-8">
+                <!-- Tabbed Interface -->
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-slate-200">
+                    <div class="flex flex-wrap space-x-2 sm:space-x-4 mb-6" role="tablist" aria-label="How to Run">
+                        <button id="cli-tab" class="code-tab active px-4 py-2 rounded-lg font-medium text-slate-600 transition-colors duration-200" role="tab" aria-selected="true" aria-controls="cli-panel">
+                            Command-Line Interface (CLI)
+                        </button>
+                        <button id="gui-tab" class="code-tab px-4 py-2 rounded-lg font-medium text-slate-600 transition-colors duration-200" role="tab" aria-selected="false" aria-controls="gui-panel">
+                            Graphical User Interface (GUI)
+                        </button>
+                        <button id="build-tab" class="code-tab px-4 py-2 rounded-lg font-medium text-slate-600 transition-colors duration-200" role="tab" aria-selected="false" aria-controls="build-panel">
+                            Build an Executable
+                        </button>
+                    </div>
+
+                    <!-- Tab Panels -->
+                    <div id="cli-panel" role="tabpanel" aria-labelledby="cli-tab">
+                        <h3 class="text-xl font-semibold text-slate-800 mb-4">Run from the Command Line</h3>
+                        <p class="text-slate-600 mb-4">
+                            The `_cli.py` script provides a powerful way to run the detector with customizable arguments.
+                        </p>
+                        <div class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto">
+                            <pre><code class="language-bash">python _cli.py "C:\path\to\your\images" --threshold 10 --strategy keep_first --dry_run no</code></pre>
+                        </div>
+                        <p class="mt-4 text-slate-600">
+                            The arguments are:
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li><strong>`directory`</strong>: The path to the folder to scan.</li>
+                                <li><strong>`--threshold`</strong>: (Optional) The maximum Hamming distance. Default is 10.</li>
+                                <li><strong>`--strategy`</strong>: (Optional) `keep_first` or `keep_smallest`. Default is `keep_first`.</li>
+                                <li><strong>`--dry_run`</strong>: (Optional) `yes` or `no`. If set to `yes`, no files will be deleted. Default is `yes`.</li>
+                            </ul>
+                        </p>
+                    </div>
+
+                    <div id="gui-panel" role="tabpanel" aria-labelledby="gui-tab" hidden>
+                        <h3 class="text-xl font-semibold text-slate-800 mb-4">Use the Graphical Interface</h3>
+                        <p class="text-slate-600 mb-4">
+                            The `gui.py` script provides a user-friendly Tkinter-based interface.
+                        </p>
+                        <div class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto">
+                            <pre><code class="language-bash">python gui.py</code></pre>
+                        </div>
+                        <p class="mt-4 text-slate-600">
+                            This will open a window where you can select a directory, set the threshold, choose a deletion strategy, and view the log output in real-time.
+                        </p>
+                    </div>
+
+                    <div id="build-panel" role="tabpanel" aria-labelledby="build-tab" hidden>
+                        <h3 class="text-xl font-semibold text-slate-800 mb-4">Building the Executable</h3>
+                        <p class="text-slate-600 mb-4">
+                            You can create a standalone executable for the GUI using the `build.bat` script and `PyInstaller`.
+                        </p>
+                        <div class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto">
+                            <pre><code class="language-bash">build.bat</code></pre>
+                        </div>
+                        <p class="mt-4 text-slate-600">
+                            This script will:
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li>Clean up any previous build files.</li>
+                                <li>Run PyInstaller with the correct parameters to create a single executable file.</li>
+                            </ul>
+                            This makes the application portable and easy to distribute, as the end-user doesn't need to install Python or the required libraries.
+                        </p>
+                    </div>
                 </div>
-                <div class="p-4 text-sm max-h-[500px] overflow-y-auto">
-                    <pre id="main-py" class="code-content language-python text-white"><code class="language-python">
+            </div>
+        </section>
+
+        <!-- Source Code Section -->
+        <section id="code" class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 text-center">Project Source Code</h2>
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-slate-200">
+                <div class="flex flex-wrap space-x-2 sm:space-x-4 mb-6" role="tablist" aria-label="Source Code Files">
+                    <button id="functions-tab" class="code-tab active px-4 py-2 rounded-lg font-medium text-slate-600 transition-colors duration-200" role="tab" aria-selected="true" aria-controls="functions-panel">
+                        functions.py
+                    </button>
+                    <button id="variables-tab" class="code-tab px-4 py-2 rounded-lg font-medium text-slate-600 transition-colors duration-200" role="tab" aria-selected="false" aria-controls="variables-panel">
+                        variables.py
+                    </button>
+                    <button id="helper-tab" class="code-tab px-4 py-2 rounded-lg font-medium text-slate-600 transition-colors duration-200" role="tab" aria-selected="false" aria-controls="helper-panel">
+                        helper.py
+                    </button>
+                    <button id="gui-tab-2" class="code-tab px-4 py-2 rounded-lg font-medium text-slate-600 transition-colors duration-200" role="tab" aria-selected="false" aria-controls="gui-panel-2">
+                        gui.py
+                    </button>
+                    <button id="cli-tab-2" class="code-tab px-4 py-2 rounded-lg font-medium text-slate-600 transition-colors duration-200" role="tab" aria-selected="false" aria-controls="cli-panel-2">
+                        _cli.py
+                    </button>
+                    <button id="requirements-tab" class="code-tab px-4 py-2 rounded-lg font-medium text-slate-600 transition-colors duration-200" role="tab" aria-selected="false" aria-controls="requirements-panel">
+                        requirements.bat
+                    </button>
+                </div>
+
+                <!-- Source Code Panels -->
+                <div id="functions-panel" role="tabpanel" aria-labelledby="functions-tab" class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto text-sm">
+                    <pre><code class="language-python">
+# cli_backup/functions.py
+
+import os
+import imagehash
+import logging
+from collections import defaultdict
+from PIL import Image
+
+logger = logging.getLogger(__name__)
+
+def get_image_hashes(var, hash_size=8, hash_method='dhash'):
+    """
+    Recursively walks through a directory, computes a perceptual hash for each
+    image file, and stores it in a dictionary.
+    
+    Args:
+        var (Variables): The variables object containing the target directory.
+        hash_size (int): The size of the hash, which can affect precision.
+        hash_method (str): The hashing algorithm to use ('phash', 'ahash', 'dhash').
+    
+    Returns:
+        dict: A dictionary where keys are image hashes and values are a list of
+              file paths that share that hash.
+    """
+    logger.info(f"Scanning directory: {var.target_directory}")
+    
+    image_hashes = defaultdict(list)
+
+    for dirpath, _, filenames in os.walk(var.target_directory):
+        for filename in filenames:
+            file_path = os.path.join(dirpath, filename)
+            
+            if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
+                continue
+
+            try:
+                img = Image.open(file_path)
+                
+                # Check if the image is valid
+                img.verify()
+
+                # Re-open the image to ensure the file pointer is at the start
+                img = Image.open(file_path)
+                
+                # Compute the hash based on the selected method
+                if hash_method == 'phash':
+                    image_hash = str(imagehash.phash(img, hash_size=hash_size))
+                elif hash_method == 'ahash':
+                    image_hash = str(imagehash.average_hash(img, hash_size=hash_size))
+                elif hash_method == 'dhash':
+                    image_hash = str(imagehash.dhash(img, hash_size=hash_size))
+                else:
+                    logger.warning(f"Unsupported hash method: {hash_method}. Using 'dhash' by default.")
+                    image_hash = str(imagehash.dhash(img, hash_size=hash_size))
+                
+                # Append the file path to the list for this hash
+                image_hashes[image_hash].append(file_path)
+            
+            except (IOError, OSError) as e:
+                logger.error(f"Error processing file {file_path}: {e}")
+                continue
+
+    return image_hashes
+
+def find_duplicates(hashes_map, threshold=10):
+    """
+    Finds groups of duplicate images based on their hashes and a given threshold.
+    
+    Args:
+        hashes_map (dict): A dictionary where keys are image hashes and values
+                           are lists of file paths.
+        threshold (int): The maximum Hamming distance for two images to be 
+                         considered near-duplicates.
+                         
+    Returns:
+        list: A list of lists, where each inner list contains the file paths of
+              a group of duplicate images.
+    """
+    
+    # Filter out unique files (those with only one hash entry)
+    hashes_to_check = {h: p for h, p in hashes_map.items() if len(p) > 1}
+    
+    # Create a list of hashes and their paths for comparison
+    hash_list = list(hashes_to_check.items())
+    
+    duplicate_groups = []
+    processed_indices = set()
+    
+    # Use a dictionary to keep track of hashes already found in a group
+    found_hashes = defaultdict(list)
+    
+    for i in range(len(hash_list)):
+        if i in processed_indices:
+            continue
+            
+        current_hash_str, current_paths = hash_list[i]
+        current_hash = imagehash.hex_to_hash(current_hash_str)
+        
+        # Start a new group with the current file
+        group = current_paths[:]
+        
+        # Mark the current file as processed
+        processed_indices.add(i)
+        
+        for j in range(i + 1, len(hash_list)):
+            if j in processed_indices:
+                continue
+            
+            other_hash_str, other_paths = hash_list[j]
+            other_hash = imagehash.hex_to_hash(other_hash_str)
+            
+            # Calculate the Hamming distance
+            hamming_distance = current_hash - other_hash
+            
+            if hamming_distance <= threshold:
+                # This is a duplicate; add all its paths to the group
+                group.extend(other_paths)
+                # Mark these files as processed to avoid re-checking
+                processed_indices.add(j)
+                
+        # If the group has more than one file, it's a duplicate group
+        if len(group) > 1:
+            duplicate_groups.append(group)
+            
+    return duplicate_groups
+
+def delete_duplicates(var, deletion_strategy='keep_first'):
+    """
+    Deletes duplicate files based on the specified strategy.
+    
+    Args:
+        var (Variables): The variables object containing duplicate groups.
+        deletion_strategy (str): The strategy to use for deletion: 'keep_first' 
+                                 or 'keep_smallest'.
+    """
+    logger.info(f"Using deletion strategy: '{deletion_strategy}'")
+    files_to_delete = []
+
+    for group in var.duplicate_groups:
+        if deletion_strategy == 'keep_first':
+            # Keep the first file found, delete the rest
+            files_to_delete.extend(group[1:])
+        elif deletion_strategy == 'keep_smallest':
+            # Sort files by size and keep the smallest one
+            files_and_sizes = [(f, os.path.getsize(f)) for f in group]
+            files_and_sizes.sort(key=lambda x: x[1])
+            files_to_delete.extend([f for f, s in files_and_sizes[1:]])
+        else:
+            logger.error(f"Error: Unsupported deletion strategy '{deletion_strategy}'. Using 'keep_first'.")
+            files_to_delete.extend(group[1:])
+
+    logger.info("\n--- Duplicate files identified ---")
+    if not files_to_delete:
+        logger.info("No duplicates found to delete.")
+    else:
+        for group in var.duplicate_groups:
+            if not group: continue
+            kept_file = group[0]
+            deleted_files_in_group = [f for f in group[1:] if f in files_to_delete]
+            if deleted_files_in_group:
+                logger.info(f"Group with original kept file: {kept_file}")
+                logger.info("  - Files to delete:")
+                for file_path in deleted_files_in_group:
+                    logger.info(f"    - {file_path}")
+
+    logger.info("-----------------------------------\n")
+    
+    deleted_count = 0
+    if not var.dry_run:
+        for file_path in files_to_delete:
+            try:
+                os.remove(file_path)
+                logger.info(f"Deleted file: {file_path}")
+                deleted_count += 1
+            except OSError as e:
+                logger.error(f"Error deleting {file_path}: {e}")
+        logger.info(f"\n{deleted_count} files were successfully deleted.")
+    else:
+        # Dry run block
+        logger.info("Dry run enabled. No files will be deleted. Above is a list of files that would have been deleted.")
+
+</code></pre>
+                </div>
+                
+                <div id="variables-panel" role="tabpanel" aria-labelledby="variables-tab" hidden class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto text-sm">
+                    <pre><code class="language-python">
+# cli_backup/variables.py
+
+class Variables:
+    """
+    A simple class to hold and manage application variables.
+    This helps in organizing the state and passing it between functions
+    in an object-oriented manner.
+    """
+    def __init__(self):
+        self.target_directory = None
+        self.threshold = None
+        self.strategy = None
+        self.dry_run = None
+
+        self.image_hashes = {}
+        self.duplicate_groups = []
+
+</code></pre>
+                </div>
+
+                <div id="helper-panel" role="tabpanel" aria-labelledby="helper-tab" hidden class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto text-sm">
+                    <pre><code class="language-python">
+# gui_backup/helper.py
+
+import os
+import logging
+import tkinter as tk
+from tkinter import filedialog, messagebox
+
+logger = logging.getLogger(__name__)
+
+class TkinterTextHandler(logging.Handler):
+    """
+    A custom logging handler that redirects log messages to a Tkinter Text widget.
+    This allows us to display real-time log output directly in the GUI.
+    """
+    def __init__(self, text_widget):
+        super().__init__()
+        self.text_widget = text_widget
+        self.text_widget.config(state=tk.DISABLED)
+        self.setFormatter(logging.Formatter('%(message)s'))
+
+    def emit(self, record):
+        """
+        Emits a log record to the Tkinter Text widget.
+        """
+        msg = self.format(record)
+        
+        self.text_widget.config(state=tk.NORMAL)
+        self.text_widget.insert(tk.END, msg + '\n')
+        self.text_widget.config(state=tk.DISABLED)
+        
+        self.text_widget.see(tk.END)
+
+def setup_gui(app):
+    """
+    Configures all the GUI widgets and their layout,
+    attaching them to the main application object.
+    
+    Args:
+        app (MyTinkerApp): The main application instance.
+    """
+    main_frame = tk.Frame(app.root, padx=10, pady=10)
+    main_frame.pack(fill=tk.BOTH, expand=True)
+
+    # Directory selection section
+    directory_frame = tk.Frame(main_frame)
+    directory_frame.pack(fill=tk.X, pady=5)
+    
+    tk.Label(directory_frame, text="Directory to Scan:").pack(side=tk.LEFT)
+    app.directory_entry = tk.Entry(directory_frame)
+    app.directory_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(5,0))
+    
+    browse_btn = tk.Button(directory_frame, text="Browse", command=lambda: browse_directory(app.directory_entry, app.status_label))
+    browse_btn.pack(side=tk.LEFT, padx=5)
+    
+    # Options section
+    options_frame = tk.Frame(main_frame)
+    options_frame.pack(fill=tk.X, pady=5)
+    
+    # Threshold
+    tk.Label(options_frame, text="Threshold:").pack(side=tk.LEFT)
+    app.threshold_entry = tk.Entry(options_frame, width=5)
+    app.threshold_entry.pack(side=tk.LEFT, padx=(5, 20))
+    app.threshold_entry.insert(0, str(app.var.threshold))
+
+    # Strategy
+    tk.Label(options_frame, text="Deletion Strategy:").pack(side=tk.LEFT)
+    app.strategy_var = tk.StringVar(options_frame)
+    app.strategy_var.set('keep_first')
+    strategy_options = ['keep_first', 'keep_smallest']
+    strategy_menu = tk.OptionMenu(options_frame, app.strategy_var, *strategy_options)
+    strategy_menu.pack(side=tk.LEFT, padx=(5, 20))
+    
+    # Checkbox for Dry Run
+    tk.Checkbutton(options_frame, text="Dry Run (don't delete files)", variable=app.dry_run, onvalue=True, offvalue=False).pack(side=tk.LEFT)
+    
+    # Checkbox for Full Logs
+    tk.Checkbutton(options_frame, text="Show Full Logs", variable=app.show_full_logs, onvalue=True, offvalue=False).pack(side=tk.LEFT)
+    
+    # Buttons
+    button_frame = tk.Frame(main_frame)
+    button_frame.pack(fill=tk.X, pady=10)
+    
+    tk.Button(button_frame, text="Analyze and Run", command=app.analyze_and_run).pack(side=tk.LEFT, expand=True, fill=tk.X)
+    tk.Button(button_frame, text="Clear Log", command=lambda: clear_log(app.log_text)).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=5)
+
+    # Status label
+    app.status_label = tk.Label(main_frame, text="Ready.", bd=1, relief=tk.SUNKEN, anchor=tk.W)
+    app.status_label.pack(side=tk.BOTTOM, fill=tk.X, pady=5)
+    
+    # Log display area
+    log_frame = tk.LabelFrame(main_frame, text="Log Output", padx=5, pady=5)
+    log_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+    
+    app.log_text = tk.Text(log_frame, wrap=tk.WORD)
+    app.log_text.pack(fill=tk.BOTH, expand=True)
+
+def setup_logging(app):
+    """
+    Configures the logging system to output to both a file and the GUI text widget.
+    
+    Args:
+        app (MyTinkerApp): The main application instance.
+    """
+    # Get the root logger and clear any existing handlers
+    root_logger = logging.getLogger()
+    if root_logger.hasHandlers():
+        root_logger.handlers.clear()
+
+    # Set up file logging
+    if not os.path.exists("logs"):
+        os.mkdir("logs")
+    log_file = os.path.join("logs", 'log.txt')
+    file_handler = logging.FileHandler(log_file, "w")
+    file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+    root_logger.addHandler(file_handler)
+
+    # Set up GUI logging
+    app.logger_handler = TkinterTextHandler(app.log_text)
+    root_logger.addHandler(app.logger_handler)
+
+    root_logger.setLevel(logging.INFO)
+
+def browse_directory(directory_entry, status_label):
+    """
+    Opens a directory selection dialog and puts the selected path
+    into the entry field.
+    """
+    directory = filedialog.askdirectory()
+    if directory:
+        normalized_path = os.path.normpath(directory)
+        directory_entry.delete(0, tk.END)
+        directory_entry.insert(0, normalized_path)
+        status_label.config(text=f"Selected: {normalized_path}")
+
+def clear_log(log_text):
+    """
+    Clears the content of the log text widget.
+    """
+    log_text.config(state=tk.NORMAL)
+    log_text.delete(1.0, tk.END)
+    log_text.config(state=tk.DISABLED)
+
+</code></pre>
+                </div>
+                
+                <div id="gui-panel-2" role="tabpanel" aria-labelledby="gui-tab-2" hidden class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto text-sm">
+                    <pre><code class="language-python">
+# gui.py
+
+from tkinter import filedialog, messagebox
+from cli_backup.variables import Variables
+from cli_backup.functions import delete_duplicates
+from gui_backup.helper import setup_gui, setup_logging, browse_directory, clear_log
+
+import _cli
+import logging
+import tkinter as tk
+import traceback
+
+class MyTinkerApp:
+    """
+    The main class for the Tkinter GUI application.
+    It encapsulates the state and logic for the GUI.
+    """
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Image Duplication Detector")
+        self.root.geometry("600x700")
+        
+        # 1. Initialize variables to hold the app state
+        self.var = Variables()
+        self.dry_run = tk.BooleanVar(value=True) # Default to dry run
+        self.show_full_logs = tk.BooleanVar(value=False)
+        self.var.threshold = 10
+
+        # 2. Setup the GUI layout and logging using helper functions
+        setup_gui(self)
+        setup_logging(self)
+
+    def analyze_and_run(self):
+        """
+        This function orchestrates the analysis and deletion process for the GUI.
+        It reads user input from the GUI and calls the core functions.
+        """
+        # Clear log and update status
+        clear_log(self.log_text)
+        self.status_label.config(text="Scanning...")
+        self.root.update_idletasks()
+
+        input_directory = self.directory_entry.get()
+        threshold_value = self.threshold_entry.get()
+        strategy_value = self.strategy_var.get()
+        
+        # Update the Variables object from GUI input
+        self.var.dry_run = self.dry_run.get()
+        
+        # Input validation
+        if not input_directory:
+            messagebox.showerror("Input Error", "Please select a directory to scan.")
+            self.status_label.config(text="Ready.")
+            return
+        
+        try:
+            self.var.threshold = int(threshold_value)
+            if self.var.threshold < 0:
+                raise ValueError
+        except ValueError:
+            messagebox.showerror("Input Error", "Threshold must be a non-negative integer.")
+            self.status_label.config(text="Ready.")
+            return
+
+        self.var.target_directory = input_directory
+        self.var.strategy = strategy_value
+        
+        try:
+            # Step 1: Find duplicates
+            self.var.duplicate_groups = _cli.find_and_group_duplicates(self.var)
+            
+            # Count total files to be deleted
+            total_files_to_delete = sum(len(group) - 1 for group in self.var.duplicate_groups)
+
+            if total_files_to_delete > 0:
+                # Step 2: Delete duplicates if dry run is off
+                if not self.var.dry_run:
+                    logger.info("Dry run is OFF. Deleting files...")
+                    delete_duplicates(self.var, deletion_strategy=self.var.strategy)
+                    self.status_label.config(text="Analysis finished. Duplicates deleted.")
+                
+                elif self.var.dry_run == True and self.show_full_logs.get() == True:
+                    logger.info("Dry Run is checked. Showing Full Logs.")
+                    delete_duplicates(self.var, deletion_strategy=self.var.strategy)
+                    self.status_label.config(text="Analysis finished. Duplicates would have been deleted.")
+                
+                elif self.var.dry_run == True and self.show_full_logs.get() == False:
+                    logger.info("Dry Run is checked & not showing Full logs")
+                    self.status_label.config(text=f"Analysis finished. Found {total_files_to_delete} duplicates. Deletion not requested.")
+
+                else:
+                    logger.error("Some error in catching the conditions")
+            else:
+                self.status_label.config(text="Analysis finished. No duplicates found.")
+
+        except Exception as e:
+            error_message = f"An error occurred: {e}"
+            self.status_label.config(text=error_message)
+            logger.error(error_message)
+            traceback.print_exc()
+
+def main():
+    root = tk.Tk()
+    app = MyTinkerApp(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
+
+</code></pre>
+                </div>
+                
+                <div id="cli-panel-2" role="tabpanel" aria-labelledby="cli-tab-2" hidden class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto text-sm">
+                    <pre><code class="language-python">
+# _cli.py
+
 import sys
 import argparse
 import os
-from scripts.functions import get_image_hashes, find_duplicates, delete_duplicates
-from scripts.variables import Variables
+import logging
+from cli_backup.functions import get_image_hashes, find_duplicates, delete_duplicates
+from cli_backup.variables import Variables
+from cli_backup.logger import loggerSetup
 
-def main(var):
+def find_and_group_duplicates(var):
     """
-    The main function to run the duplicate image detection and deletion tool.
-    
-    This function handles command-line arguments using the argparse module,
-    orchestrates the workflow by calling functions from the scripts.functions
-    module, and provides a user interface for confirming deletions.
+    Finds and groups duplicate images without prompting for deletion.
+    This function is designed to be called by the GUI.
     """
+    logger = logging.getLogger(__name__)
+
+    # Verify that the provided path is a valid directory
+    if not os.path.isdir(var.target_directory):
+        logger.error(f"Error: The provided path '{var.target_directory}' is not a valid directory.")
+        return []
+
+    # Step 1: Get all image hashes
+    try:
+        logger.info(f"Scanning '{var.target_directory}' with threshold {var.threshold}...")
+        hashes_map = get_image_hashes(var)
+    except Exception as e:
+        logger.error(f"An unexpected error occurred during hashing: {e}")
+        return []
+
+    # Step 2: Find duplicate groups using the corrected function
+    try:
+        duplicate_groups = find_duplicates(hashes_map, threshold=var.threshold)
+        logger.info(f"Successfully found {len(duplicate_groups)} groups of duplicates.")
+    except Exception as e:
+        logger.error(f"An unexpected error occurred while finding duplicates: {e}")
+        return []
+
+    return duplicate_groups
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="A tool to detect and delete duplicate and near-duplicate images based on their content."
     )
@@ -231,371 +785,202 @@ def main(var):
         help="The strategy to use for deletion: 'keep_first' or 'keep_smallest'. (default: 'keep_first')"
     )
     
+    parser.add_argument(
+        "--dry_run",
+        type=str,
+        default='yes',
+        help="Do you want to delete the files? Yes or No. (default: no)"
+    )
+
+    logger = loggerSetup()
+    logger = logging.getLogger(__name__)
+
     try:
         args = parser.parse_args()
-    except Exception as e:
-        print(f"Error parsing arguments: {e}", file=sys.stderr)
+    except Exception as e:        
+        logger.info(f"Error parsing arguments: {e}", file=sys.stderr)
         sys.exit(1)
 
+    # Initialize a Variables object with command-line arguments
+    var = Variables()
     var.target_directory = args.directory
     var.threshold = args.threshold
     var.strategy = args.strategy
+    var.dry_run = args.dry_run.lower() == 'yes'
 
-    if not os.path.isdir(var.target_directory):
-        print(f"Error: The provided path '{var.target_directory}' is not a valid directory.", file=sys.stderr)
-        sys.exit(1)
-    
     try:
-        print(f"Scanning '{var.target_directory}' with threshold {var.threshold} and strategy '{var.strategy}'...")
-        hashes_map = get_image_hashes(var)
+        logger.info("\n************")
+        logger.info("Script Started")
+        logger.info("************")
+        
+        # Step 1: Find duplicates
+        var.duplicate_groups = find_and_group_duplicates(var)
+        
+        if var.duplicate_groups:
+            # Step 2: Delete duplicates if dry run is off
+            delete_duplicates(var, deletion_strategy=var.strategy)
+        else:
+            logger.info("No duplicates found.")
+
+        logger.info("\n************")
+        logger.info("Script Ended")
+        logger.info("************")
+
     except Exception as e:
-        print(f"An unexpected error occurred during hashing: {e}", file=sys.stderr)
-        sys.exit(1)
-    
-    try:
-        var.duplicate_groups = find_duplicates(hashes_map, threshold=var.threshold)
-    except Exception as e:
-        print(f"An unexpected error occurred while finding duplicates: {e}", file=sys.stderr)
-        sys.exit(1)
-    
-    try:
-        delete_duplicates(var, deletion_strategy=var.strategy)
-    except Exception as e:
-        print(f"An unexpected error occurred during deletion: {e}", file=sys.stderr)
-        sys.exit(1)
-        
-    print("\nProcess finished.")
+        logger.error(f"An unexpected error occurred: {e}")
+        traceback.print_exc()
 
-if __name__ == "__main__":
-    var=Variables()
-    main(var)
-                    </code></pre>
-                    <pre id="functions-py" class="code-content language-python hidden text-white"><code class="language-python">
-import os
-from PIL import Image
-import imagehash
-import sys
-import re
-
-def get_image_hashes(var, hash_size=8, hash_method='dhash'):
-    """
-    Recursively walks through a directory, computes a perceptual hash for each
-    image file, and stores it in the image_hashes dictionary.
-    """
-    print(f"Scanning directory: {var.target_directory}")
-    
-    for dirpath, _, filenames in os.walk(var.target_directory):
-        for filename in filenames:
-            file_path = os.path.join(dirpath, filename)
-            
-            if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
-                continue
-
-            try:
-                with Image.open(file_path) as img:
-                    img = img.convert('RGB')
-                    image_hash = imagehash.dhash(img)
-
-                    hash_str = str(image_hash)
-                    if hash_str in var.image_hashes:
-                        var.image_hashes[hash_str].append(file_path)
-                    else:
-                        var.image_hashes[hash_str] = [file_path]
-            
-            except Exception as e:
-                print(f"Could not process file {file_path}: {e}", file=sys.stderr)
-                continue
-    
-    print("Scanning complete.")
-    return var.image_hashes
-
-def find_duplicates(hashes_map, threshold=10):
-    """
-    Finds groups of exact and near-duplicate images based on their hashes.
-    """
-    duplicates = []
-    processed_hashes = set()
-    
-    for hash_str, file_paths in hashes_map.items():
-        if hash_str in processed_hashes:
-            continue
-        
-        current_group = file_paths[:]
-        processed_hashes.add(hash_str)
-        
-        if threshold > 0:
-            for other_hash_str, other_file_paths in hashes_map.items():
-                if hash_str != other_hash_str and other_hash_str not in processed_hashes:
-                    try:
-                        hash1 = imagehash.hex_to_hash(hash_str)
-                        hash2 = imagehash.hex_to_hash(other_hash_str)
-                        if hash1 - hash2 <= threshold:
-                            current_group.extend(other_file_paths)
-                            processed_hashes.add(other_hash_str)
-                    except Exception as e:
-                        print(f"Error comparing hashes: {e}", file=sys.stderr)
-                        continue
-
-        if len(current_group) > 1:
-            duplicates.append(current_group)
-    
-    return duplicates
-
-def delete_duplicates(var, deletion_strategy='keep_first'):
-    def numeric_key(path):
-        filename = os.path.splitext(os.path.basename(path))[0]
-        numbers = re.findall(r'\d+', filename)
-        return tuple(int(num) for num in numbers) if numbers else (float('inf'),)
-
-    def original_file_key(path):
-        return 'copy' in os.path.basename(path).lower()
-
-    if not var.duplicate_groups:
-        print("No duplicate images to delete.")
-        return
-
-    var.duplicate_groups.sort(key=lambda group: numeric_key(group[0]))
-    print(f"\nFound {len(var.duplicate_groups)} duplicate groups.")
-    
-    files_to_delete = []
-    
-    for group in var.duplicate_groups:
-        group.sort(key=original_file_key)
-
-        if deletion_strategy == 'keep_first':
-            files_to_delete.extend(group[1:])
-        elif deletion_strategy == 'keep_smallest':
-            files_and_sizes = [(path, os.path.getsize(path)) for path in group]
-            files_and_sizes.sort(key=lambda x: x[1])
-            files_to_delete.extend([path for path, _ in files_and_sizes[1:]])
-    
-    print("\n--- Dry Run: Duplicate files ---")
-    for group in var.duplicate_groups:
-        print(f"{group[0]}: {group[1:]}")
-    print("-----------------------------------")
-    
-    response = input(f"\nAre you sure you want to delete {len(files_to_delete)} files? (yes/no): ").lower()
-    
-    if response in ['yes', 'y']:
-        deleted_count = 0
-        for file_path in files_to_delete:
-            try:
-                os.remove(file_path)
-                deleted_count += 1
-                print(f"Deleted: {file_path}")
-            except OSError as e:
-                print(f"Error deleting {file_path}: {e}", file=sys.stderr)
-        
-        print(f"\nSuccessfully deleted {deleted_count} files.")
-    else:
-        print("Deletion cancelled by user.")
-                    </code></pre>
-                    <pre id="variables-py" class="code-content language-python hidden text-white"><code class="language-python">
-class Variables:
-    def __init__(self):
-        self.target_directory = None
-        self.threshold = None
-        self.strategy = None
-        self.image_hashes = {}
-        self.duplicate_groups = []
-                    </code></pre>
-                    <pre id="requirements-txt" class="code-content language-text hidden text-white"><code class="language-text">
-imagehash
-Pillow
-                    </code></pre>
+</code></pre>
                 </div>
+                
+                <div id="build-panel-2" role="tabpanel" aria-labelledby="build-tab-2" hidden class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto text-sm">
+                    <pre><code class="language-bash">
+@echo off
+
+rem Delete existing build and dist folders if they exist
+echo ===========================================
+echo Cleaning previous build artifacts...
+rmdir /S /Q "build" 2>nul
+echo Deleted build/
+rmdir /S /Q "dist" 2>nul
+echo Deleted dist/
+IF EXIST *.spec (
+    DEL /F /Q *.spec
+    echo Deleted *.spec
+)
+echo Cleaning complete.
+echo ===========================================
+
+rem Run PyInstaller command
+
+pyinstaller --clean --onefile --noconsole --name="Image Duplication Detector" --hidden-import=imagehash -p ./src src/gui.py
+
+echo ===========================================
+echo Build process finished
+echo ===========================================
+
+</code></pre>
+                </div>
+                
+                <div id="requirements-panel" role="tabpanel" aria-labelledby="requirements-tab" hidden class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto text-sm">
+                    <pre><code class="language-bash">
+@echo off
+REM Activate your virtual environment first
+REM Example: call path\to\your\venv\Scripts\activate
+
+call py-env\Scripts\activate.bat
+
+echo ===========================================
+echo Installing required Python packages...
+echo ===========================================
+
+pip install Pillow
+pip install imagehash
+pip install numpy
+pip install pyinstaller
+pip install imagehash
+
+echo ===========================================
+echo All packages installed.
+echo ===========================================
+pause
+
+</code></pre>
+                </div>
+                
             </div>
         </section>
 
-        <!-- How to Use Section -->
-        <section id="how-to-use" class="bg-white rounded-lg shadow-lg p-6 md:p-8">
-            <div class="text-center mb-8">
-                <h3 class="text-3xl md:text-4xl font-bold text-slate-900">Get Started</h3>
-                <p class="max-w-2xl mx-auto mt-3 text-lg text-slate-600">
-                    Ready to try it out? Follow these simple steps to set up your environment and run the tool on your own computer. You'll need Python installed.
-                </p>
-            </div>
-            <div class="space-y-6">
-                <div>
-                    <h4 class="font-semibold text-lg text-slate-800 mb-2">1. Set Up the Environment</h4>
-                    <p class="text-slate-600 mb-2">Create and activate a virtual environment to manage dependencies for the project. This is a best practice to keep your system clean.</p>
-                    <div class="bg-slate-800 rounded-md p-3 text-white font-mono text-sm relative">
-                        <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded">Copy</button>
-                        <code>python -m venv py-env && py-env\Scripts\activate</code>
-                    </div>
-                    <p class="text-slate-600 mt-2 text-xs">Note: On Windows, use `venv\Scripts\activate` to activate the environment.</p>
-                </div>
-                <div>
-                    <h4 class="font-semibold text-lg text-slate-800 mb-2">2. Install Dependencies</h4>
-                    <p class="text-slate-600 mb-2">With your environment activated, run the following command to install all necessary libraries from `requirements.txt`.</p>
-                     <div class="bg-slate-800 rounded-md p-3 text-white font-mono text-sm relative">
-                        <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded">Copy</button>
-                        <code>pip install -r requirements.txt</code>
-                    </div>
-                </div>
-                <div>
-                    <h4 class="font-semibold text-lg text-slate-800 mb-2">3. Run the Script</h4>
-                    <p class="text-slate-600 mb-2">Navigate to the project directory in your terminal and run the `main.py` script, followed by the path to the folder you want to scan.</p>
-                     <div class="bg-slate-800 rounded-md p-3 text-white font-mono text-sm relative">
-                        <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded">Copy</button>
-                        <code>python main.py "path/to/your/image/directory"</code>
-                    </div>
-                </div>
+        <!-- Directory Structure Section -->
+        <section id="directory" class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 text-center">Project Directory Structure</h2>
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-slate-200">
+                <pre class="bg-slate-900 text-white p-4 rounded-lg text-sm leading-relaxed">
+.
+├── build.bat
+├── requirements.bat
+├── gui.py
+├── _cli.py
+├── cli_backup/
+│   ├── functions.py
+│   ├── logger.py
+│   └── variables.py
+├── gui_backup/
+│   └── helper.py
+└── logs/
+</pre>
             </div>
         </section>
 
     </main>
 
-    <footer class="text-center py-8 border-t border-slate-200 mt-16">
-        <p class="text-slate-500">Interactive Explainer created to demonstrate the Python Duplicate Image Finder project.</p>
+    <!-- Footer -->
+    <footer class="bg-slate-800 text-white py-8 mt-16">
+        <div class="container mx-auto px-4 text-center text-slate-400">
+            <p>&copy; 2024 Image Duplication Detector. All rights reserved.</p>
+        </div>
     </footer>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    // Mobile Menu Toggle
-    const mobileMenuButton = document.getElementById('mobile-menu-button');
-    const mobileMenu = document.getElementById('mobile-menu');
-    mobileMenuButton.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
-    });
-
-    // Close mobile menu when a link is clicked
-    document.querySelectorAll('#mobile-menu a').forEach(link => {
-        link.addEventListener('click', () => {
-            mobileMenu.classList.add('hidden');
-        });
-    });
-
-    // Interactive Flowchart Logic
-    const steps = document.querySelectorAll('.flow-step');
-    const explanationBox = document.getElementById('explanation-box');
-    const explanations = {
-        'step-1': {
-            title: 'Step 1: Parsing User Input',
-            description: 'The application starts by reading the command-line arguments provided by the user. It uses the `argparse` library to define the required directory path and optional arguments like `--threshold` and `--strategy`. This makes the tool flexible and configurable directly from the terminal.',
-            code: `parser = argparse.ArgumentParser(...)
-parser.add_argument("directory", type=str, ...)
-parser.add_argument("--threshold", type=int, default=10, ...)
-parser.add_argument("--strategy", type=str, default='keep_first', ...)`
-        },
-        'step-2': {
-            title: 'Step 2: Scanning and Hashing Images',
-            description: 'The script recursively walks through the target directory. For each image file, it opens the image, converts it to a standard format, and computes its perceptual hash using the `imagehash` library. Each hash and its corresponding file path are stored in a dictionary.',
-            code: `for dirpath, _, filenames in os.walk(var.target_directory):
-    for filename in filenames:
-        # ...
-        with Image.open(file_path) as img:
-            img = img.convert('RGB')
-            image_hash = imagehash.dhash(img)
-            # ... store hash_str and file_path`
-        },
-        'step-3': {
-            title: 'Step 3: Finding Duplicate Groups',
-            description: 'With all hashes collected, this step compares every hash against every other hash. It calculates the Hamming distance between them. If the distance is less than or equal to the specified threshold, the images are considered duplicates and grouped together.',
-            code: `for hash_str, file_paths in hashes_map.items():
-    # ...
-    for other_hash_str, other_file_paths in hashes_map.items():
-        # ...
-        hash1 = imagehash.hex_to_hash(hash_str)
-        hash2 = imagehash.hex_to_hash(other_hash_str)
-        if hash1 - hash2 <= threshold:
-            current_group.extend(other_file_paths)`
-        },
-        'step-4': {
-            title: 'Step 4: Confirming and Deleting Files',
-            description: 'Finally, the script presents a "dry run" list of all duplicate files it plans to delete. It prompts the user for a final "yes/no" confirmation. If confirmed, it proceeds to delete the files from the disk based on the chosen deletion strategy, providing a safe way to manage the process.',
-            code: `print("\\n--- Dry Run: Duplicate files ---")
-# ...
-response = input(f"\\nAre you sure you want to delete {len(files_to_delete)} files? (yes/no): ").lower()
-if response in ['yes', 'y']:
-    for file_path in files_to_delete:
-        os.remove(file_path)`
-        }
-    };
-
-    function updateExplanation(stepId) {
-        const content = explanations[stepId];
-        if (!content) {
-            explanationBox.innerHTML = '<p class="text-center text-slate-500">Click a step above to see details.</p>';
-            return;
-        }
-        explanationBox.innerHTML = `
-            <h4 class="font-bold text-xl text-slate-800 mb-2">${content.title}</h4>
-            <p class="text-slate-600 mb-4">${content.description}</p>
-            <div class="bg-slate-800 rounded-md p-3 text-white font-mono text-sm">
-                <pre><code>${content.code}</code></pre>
-            </div>
-        `;
-    }
-
-    steps.forEach(step => {
-        step.addEventListener('click', () => {
-            steps.forEach(s => s.classList.remove('active'));
-            step.classList.add('active');
-            updateExplanation(step.id);
-        });
-    });
-
-    // Initialize with the first step active
-    document.getElementById('step-1').click();
-
-    // Code Explorer Tabs
-    const tabs = document.querySelectorAll('.code-tab');
-    const contents = document.querySelectorAll('.code-content');
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-
-            const target = tab.getAttribute('data-target');
-            contents.forEach(content => {
-                if (content.id === target) {
-                    content.classList.remove('hidden');
-                } else {
-                    content.classList.add('hidden');
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const codeTabs = document.querySelectorAll('.code-tab');
+            const codePanels = document.querySelectorAll('[id$="-panel"]');
+            
+            // Function to handle tab switching
+            function switchTab(tabId) {
+                // Deactivate all tabs and hide all panels
+                codeTabs.forEach(tab => tab.classList.remove('active'));
+                codePanels.forEach(panel => panel.setAttribute('hidden', ''));
+                
+                // Activate the selected tab and show its corresponding panel
+                const activeTab = document.getElementById(tabId);
+                const activePanel = document.getElementById(tabId.replace('-tab', '-panel'));
+                
+                if (activeTab && activePanel) {
+                    activeTab.classList.add('active');
+                    activePanel.removeAttribute('hidden');
+                } else if (tabId.includes('cli') || tabId.includes('gui') || tabId.includes('build')) {
+                    // Handle the duplicate CLI/GUI/BUILD tabs
+                    const mainId = tabId.includes('cli') ? 'cli' : (tabId.includes('gui') ? 'gui' : 'build');
+                    const mainTab = document.getElementById(mainId + '-tab');
+                    const mainPanel = document.getElementById(mainId + '-panel');
+                    if (mainTab && mainPanel) {
+                        mainTab.classList.add('active');
+                        mainPanel.removeAttribute('hidden');
+                    }
                 }
-            });
-        });
-    });
-    // Initialize with the first tab active
-    tabs[0].click();
-
-    // Copy to Clipboard
-    document.querySelectorAll('.copy-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const codeElement = e.target.nextElementSibling;
-            const code = codeElement.innerText;
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(code).then(() => {
-                    e.target.innerText = 'Copied!';
-                    setTimeout(() => {
-                        e.target.innerText = 'Copy';
-                    }, 2000);
-                }).catch(err => {
-                    console.error('Could not copy text: ', err);
-                });
-            } else {
-                // Fallback for older browsers
-                const textarea = document.createElement('textarea');
-                textarea.value = code;
-                document.body.appendChild(textarea);
-                textarea.select();
-                try {
-                    document.execCommand('copy');
-                    e.target.innerText = 'Copied!';
-                    setTimeout(() => {
-                        e.target.innerText = 'Copy';
-                    }, 2000);
-                } catch (err) {
-                    console.error('Fallback: Could not copy text: ', err);
-                }
-                document.body.removeChild(textarea);
             }
+
+            // Add click listeners to all tabs
+            codeTabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const tabId = e.target.id;
+                    switchTab(tabId);
+                });
+            });
+
+            // Set the initial active tab
+            switchTab('functions-tab');
+            
+            // Handle the run section tabs specifically
+            const runTabs = document.querySelectorAll('#run .code-tab');
+            const runPanels = document.querySelectorAll('#run [role="tabpanel"]');
+            
+            runTabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    runTabs.forEach(t => t.classList.remove('active'));
+                    e.target.classList.add('active');
+                    
+                    runPanels.forEach(p => p.setAttribute('hidden', ''));
+                    document.getElementById(e.target.getAttribute('aria-controls')).removeAttribute('hidden');
+                });
+            });
+            
+            // Set initial active run tab
+            document.getElementById('cli-tab').click();
+            
         });
-    });
-});
-</script>
+    </script>
 
 </body>
 </html>
