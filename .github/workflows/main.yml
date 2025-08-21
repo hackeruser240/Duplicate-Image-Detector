@@ -42,5 +42,5 @@ jobs:
           prerelease: false
           body: |
             ### Release Notes 📝
-            - ONLY MOCK SOFTWARE. Does NOT delete your original files.
-            - Enter different options to test functionality.
+            - Does NOT delete original files.
+            - Detects duplicates and keeps the first instance (another option avialable)
