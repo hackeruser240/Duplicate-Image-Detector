@@ -152,7 +152,7 @@ def delete_duplicates(var, deletion_strategy='keep_first'):
             files_to_delete.extend(group[1:])
 
     # Print a summary of files to be deleted (Dry Run)
-    logger.info("\n--- Dry Run: Duplicate files ---")
+    logger.info("\n--- Duplicate files ---")
     for group in var.duplicate_groups:
         logger.info(f"Group with original kept file:")
         logger.info(f"  - Kept: {group[0]}")
@@ -161,18 +161,22 @@ def delete_duplicates(var, deletion_strategy='keep_first'):
             logger.info(f"    - {file_path}")
     logger.info("-----------------------------------\n")
     
-    response = var.delete_files
-    
-    if response in ['yes', 'y', True]:
-        deleted_count = 0
+    deleted_count = 0
+    if not var.dry_run:
         for file_path in files_to_delete:
             try:
-                #os.remove(file_path) # This is commented out for safety
+                os.remove(file_path)
+                logger.info(f"Deleted file: {file_path}")
                 deleted_count += 1
-                logger.info(f"Deleted: {file_path}")
             except OSError as e:
                 logger.error(f"Error deleting {file_path}: {e}")
-        
+    else:
+        # This is the dry run block
+        logger.info("Dry run enabled. No files will be deleted.")
+        for file_path in files_to_delete:
+            logger.info(f"Would have deleted: {file_path}")
+    
+    if not var.dry_run:
         logger.info(f"\nSuccessfully deleted {deleted_count} files.")
     else:
-        logger.info("Deletion cancelled by user.")
+        logger.info(f"\nNo files were deleted because dry run was enabled.")

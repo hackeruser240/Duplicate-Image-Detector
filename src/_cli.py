@@ -100,10 +100,10 @@ if __name__ == "__main__":
     )
     
     parser.add_argument(
-        "--delete_files",
+        "--dry_run",
         type=str,
         default='yes',
-        help="Do you want to delete the files? Yes or No."
+        help="Do you want to delete the files? Yes or No. (default: no)"
     )
 
     logger = loggerSetup()
@@ -120,6 +120,7 @@ if __name__ == "__main__":
     var.target_directory = args.directory
     var.threshold = args.threshold
     var.strategy = args.strategy
-    var.delete_files = True if args.delete_files.lower() == 'yes' else False
+    var.dry_run = True if args.dry_run.lower() == 'yes' else False
+    
 
     main(var)
