@@ -71,20 +71,15 @@ def setup_gui(app):
     app.strategy_menu.grid(row=5, column=1, padx=5, pady=5, sticky="ew")
     
     # New Checkbutton for deletion, linked to the BooleanVar
-    app.delete_check = tk.Checkbutton(input_frame, text="Delete duplicates automatically", variable=app.delete_checkbox_var)
-    app.delete_check.grid(row=6, column=0, columnspan=2)
+    app.delete_check = tk.Checkbutton(input_frame, text="Dry Run", variable=app.dry_run)
+    app.delete_check.grid(row=6, column=0, sticky=tk.W, columnspan=2)
+    app.show_full_logs_btn = tk.Checkbutton(input_frame, text="Show Full Logs", variable=app.show_full_logs)
+    app.show_full_logs_btn.grid(row=7, column=0, sticky=tk.W, columnspan=2)
 
-    # Analyze Button
-    # Create a frame to hold both buttons
     button_frame = tk.Frame(app.root)
     button_frame.pack(pady=0)
-
-    # Pack the "Analyze and Run" button into the new frame
     app.analyze_button = tk.Button(button_frame, text="Analyze and Run", command=app.analyze_and_run)
     app.analyze_button.pack(side=tk.LEFT, padx=5)
-
-    # Pack the "Clear Log" button next to it
-    # The command is updated to clear both the log text and the status label
     app.clear_button = tk.Button(button_frame, text="Clear Log", command=lambda: [clear_log(app.log_text), app.status_label.config(text="All Logs Cleared")])
     app.clear_button.pack(side=tk.LEFT, padx=5)
         
@@ -143,7 +138,7 @@ def browse_directory(directory_entry, status_label):
         directory_entry.delete(0, tk.END)
         directory_entry.insert(0, normalized_path)
         status_label.config(text=f"Selected: {normalized_path}")
-        logger.info(f"Directory selected: {normalized_path}")
+        #logger.info(f"Directory selected: {normalized_path}")
 
 def clear_log(log_text):
     """

@@ -41,6 +41,8 @@ jobs:
           draft: false
           prerelease: false
           body: |
-            ### Release Notes 📝
-            - Does NOT delete original files.
-            - Detects duplicates and keeps the first instance (another option avialable)
+              ### Release Notes 📝
+              - Added two buttons: "Dry Run" and "Show Full Logs"
+              - Both buttons are checked → Shows full logs WITHOUT actually deleting
+              - Only "Dry Run" is checked → Shows short logs WITHOUT actually deleting
+              - Both are NOT checked → Normal operating mode. Deletes duplicate images

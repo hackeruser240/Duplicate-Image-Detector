@@ -17,7 +17,8 @@ class MyTinkerApp:
         
         # 1. Initialize variables
         self.var = Variables()
-        self.delete_checkbox_var = tk.BooleanVar()
+        self.dry_run = tk.BooleanVar()
+        self.show_full_logs=tk.BooleanVar(value=False)
         self.var.threshold = 10
 
         # 2. Setup the GUI layout and logging using helper functions
@@ -33,7 +34,7 @@ class MyTinkerApp:
         threshold_value = self.threshold_entry.get()
         strategy_value = self.strategy_var.get()
         
-        self.var.delete_files = self.delete_checkbox_var.get()
+        self.var.dry_run = self.dry_run.get()
         
         if not input_directory:
             self.status_label.config(text="Please select a directory first!")
@@ -45,10 +46,16 @@ class MyTinkerApp:
         logger = logging.getLogger(__name__)
 
         try:
-            self.var.target_directory = input_directory
-            self.var.threshold = int(threshold_value) if threshold_value else 10
-            self.var.strategy = strategy_value
             
+            try:
+                self.var.threshold = int(threshold_value) if threshold_value else 10
+            except ValueError as e:
+                logger.error(f"Invalid threshold value. Using default of 10. Error: {e}")
+                self.var.threshold = 10
+                
+            self.var.strategy = strategy_value
+            self.var.target_directory = input_directory
+
             logger.info("\n***************")
             logger.info("Starting Script")
             logger.info("***************\n")
@@ -63,12 +70,23 @@ class MyTinkerApp:
             total_files_to_delete = sum(len(group) - 1 for group in duplicate_groups)
             
             if total_files_to_delete > 0:
-                if self.var.delete_files:
-                    logger.info("Deletion checkbox is checked. Proceeding with deletion...")
+                if self.var.dry_run == False :
+                    logger.info("Dry Run is NOT checked. Proceeding with deletion.")
                     delete_duplicates(self.var, deletion_strategy=self.var.strategy)
                     self.status_label.config(text="Analysis finished. Duplicates deleted.")
-                else:
+                
+                elif self.var.dry_run == True and self.show_full_logs.get() == True:
+                    
+                    logger.info("Dry Run is checked. Showing Full Logs.")
+                    delete_duplicates(self.var, deletion_strategy=self.var.strategy)
+                    self.status_label.config(text="Analysis finished. Duplicates deleted.")
+                
+                elif self.var.dry_run == True and self.show_full_logs.get() == False:
+                    logger.info("Dry Run is checked & not showing Full logs")
                     self.status_label.config(text=f"Analysis finished. Found {total_files_to_delete} duplicates. Deletion not requested.")
+
+                else:
+                    logger.error("Some error in catching the conditions")
             else:
                 self.status_label.config(text="Analysis finished. No duplicates found.")
 
@@ -79,6 +97,7 @@ class MyTinkerApp:
         except Exception as e:
             error_message = f"An error occurred: {e}"
             self.status_label.config(text=error_message)
+            logger.error(error_message)
             traceback.print_exc()
 
 def main():
