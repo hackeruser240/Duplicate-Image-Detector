@@ -1,0 +1,5 @@
+ Pillow
+ imagehash
+ numpy
+ pyinstaller
+ imagehash
