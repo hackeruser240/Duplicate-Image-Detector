@@ -7,3 +7,4 @@ logs/
 *.spec
 build/
 dist/
+prompts/
