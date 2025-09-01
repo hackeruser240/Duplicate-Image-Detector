@@ -52,11 +52,12 @@
     <!-- Navbar -->
     <nav class="bg-white shadow-sm sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="#" class="text-2xl font-bold text-sky-500">
+            <a href="#" class="text-2xl font-bold">
                 <i class="fas fa-image"></i> Image Duplication Detector
             </a>
             <div class="space-x-4 hidden md:block">
                 <a href="#about" class="nav-link text-gray-600 font-medium">About</a>
+                <a href="#tools" class="nav-link text-gray-600 font-medium">Tools</a>
                 <a href="#concepts" class="nav-link text-gray-600 font-medium">Concepts</a>
                 <a href="#projectWorking" class="nav-link text-gray-600 font-medium">Project Working</a>
                 <a href="#run" class="nav-link text-gray-600 font-medium">Run</a>
@@ -67,7 +68,7 @@
     <main class="container mx-auto px-4 py-8 space-y-12">
         <!-- About Section -->
         <section id="about" class="bg-white p-8 rounded-xl shadow-lg">
-            <h2 class="text-3xl font-bold mb-4 text-sky-600">About</h2>
+            <h2 class="text-3xl font-bold mb-4">About</h2>
             <p class="mb-4 text-gray-700">
                 The Image Duplication Detector is a powerful tool designed to identify duplicate or near-duplicate images within a dataset.
                 It uses advanced algorithms to analyze image content, rather than just file metadata, allowing it to find identical images
@@ -81,9 +82,72 @@
             </p>
         </section>
 
+        <!-- Tools/Technologies Section -->
+        <section id="tools" class="bg-white p-8 rounded-xl shadow-lg">
+            <h2 class="text-3xl font-bold mb-6">Tools/Technologies</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 text-center">
+                <!-- Docker -->
+                <div class="bg-slate-50 p-6 rounded-lg flex flex-col items-center shadow-sm hover:shadow-md transition-shadow">
+                    <i class="fab fa-docker text-6xl text-blue-400 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Docker</h3>
+                    <p class="text-gray-700">
+                        Containerization for consistent and portable application deployment.
+                    </p>
+                </div>
+                <!-- Git/GitHub -->
+                <div class="bg-slate-50 p-6 rounded-lg flex flex-col items-center shadow-sm hover:shadow-md transition-shadow">
+                    <i class="fab fa-github text-6xl text-gray-800 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Git/GitHub</h3>
+                    <p class="text-gray-700">
+                        Version control and collaborative development platform.
+                    </p>
+                </div>
+                <!-- GitHub Actions (CI/CD) -->
+                <div class="bg-slate-50 p-6 rounded-lg flex flex-col items-center shadow-sm hover:shadow-md transition-shadow">
+                    <i class="fas fa-rocket text-6xl text-purple-600 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">GitHub Actions</h3>
+                    <p class="text-gray-700">
+                        Automation of build, test, and deployment workflows.
+                    </p>
+                </div>
+                <!-- GUI using Tkinter -->
+                <div class="bg-slate-50 p-6 rounded-lg flex flex-col items-center shadow-sm hover:shadow-md transition-shadow">
+                    <i class="fas fa-desktop text-6xl text-teal-600 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">GUI with Tkinter</h3>
+                    <p class="text-gray-700">
+                        A graphical user interface for easy, non-CLI interaction.
+                    </p>
+                </div>
+                 <!-- Python Logging -->
+                 <div class="bg-slate-50 p-6 rounded-lg flex flex-col items-center shadow-sm hover:shadow-md transition-shadow">
+                    <i class="fas fa-clipboard-list text-6xl text-indigo-600 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Python Logging</h3>
+                    <p class="text-gray-700">
+                        For comprehensive and structured event and error logging.
+                    </p>
+                </div>
+                 <!-- Python Argparse -->
+                 <div class="bg-slate-50 p-6 rounded-lg flex flex-col items-center shadow-sm hover:shadow-md transition-shadow">
+                    <i class="fas fa-terminal text-6xl text-orange-500 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Python Argparse</h3>
+                    <p class="text-gray-700">
+                        For defining and managing command-line arguments and flags.
+                    </p>
+                </div>
+                 <!-- Python OOP -->
+                 <div class="bg-slate-50 p-6 rounded-lg flex flex-col items-center shadow-sm hover:shadow-md transition-shadow">
+                    <i class="fas fa-cubes text-6xl text-red-500 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Python OOP</h3>
+                    <p class="text-gray-700">
+                        Object-oriented programming for modular and scalable code.
+                    </p>
+                </div>
+            </div>
+        </section>
+
         <!-- Concepts Section -->
-        <section id="concepts" class="bg-white p-8 rounded-xl shadow-lg">
-            <h2 class="text-3xl font-bold mb-4 text-sky-600">Core Concepts</h2>
+        <section id="concepts" class="bg-white p-8 rounded-xl shadow-lg max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold mb-4 ">Core Concepts</h2>
             <div class="space-y-6">
                 <!-- Perceptual Hashing -->
                 <details class="concept-toggle bg-slate-50 p-6 rounded-lg">
@@ -176,8 +240,8 @@
         </section>
 
         <!-- Run Section -->
-        <section id="run" class="bg-white p-8 rounded-xl shadow-lg">
-            <h2 class="text-3xl font-bold mb-4 text-sky-600">Run</h2>
+        <section id="run" class="bg-white p-8 rounded-xl shadow-lg max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold mb-4 ">Run</h2>
             <p class="mb-4 text-gray-700">
                 The Image Duplication Detector can be run in several ways, from the command line to a graphical user interface. Choose the method that best fits your workflow.
             </p>
